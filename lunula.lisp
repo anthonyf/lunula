@@ -52,14 +52,13 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
                 #:aref #:char
                 #:assert #:error
                 #:setq #:setf
-                #:loop ;; only simple loop supported
+                #:loop ;; only simple loop supported for now
                 #:make-symbol
-                #:string #:vector 
+                #:string #:vector
                 #:defvar #:defparameter
                 #:array-dimension
                 #:make-string
                 #:make-array
-                #:code-char #:char-code
                 #:truncate
                 #:values
                 #:multiple-value-list
@@ -113,27 +112,29 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
            #:truncate
            #:read-char #:peek-char #:write-char
            #:*standard-input* #:*standard-output*
-           #:*read-table*
+           #:*read-table* #:*read-base*
            #:set-macro-character #:get-macro-character
            #:first #:rest #:second #:third #:last #:butlast
            #:append #:nconc #:nreconc
            #:copy-list
            #:subseq
-           #:some #:every #:notevery #:notany))
+           #:some #:every #:notevery #:notany
+           #:digit-char #:digit-char-p
+           #:read #:read-from-string))
 
 (defpackage :lunula-user
   (:use :lunula))
 
 ;;;; common lisp special forms
-;; block      let*                  return-from      
-;; catch      load-time-value       setq             
-;; eval-when  locally               symbol-macrolet  
-;; flet       macrolet              tagbody          
-;; function   multiple-value-call   the              
-;; go         multiple-value-prog1  throw            
-;; if         progn                 unwind-protect   
-;; labels     progv                                  
-;; let        quote   
+;; block      let*                  return-from
+;; catch      load-time-value       setq
+;; eval-when  locally               symbol-macrolet
+;; flet       macrolet              tagbody
+;; function   multiple-value-call   the
+;; go         multiple-value-prog1  throw
+;; if         progn                 unwind-protect
+;; labels     progv
+;; let        quote
 
 
 (in-package :lunula)
@@ -191,6 +192,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
 ;; functions that we need in order to implement DEFMACRO.
 
 (defun not (thing) (if thing nil t))
+(defun null (thing) (eq nil thing))
 
 (defun list (&rest args) args)
 
@@ -203,7 +205,6 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
            (characterp b)
            (eq a b))))
 
-(defun null (thing) (eq nil thing))
 (defun cadr (thing) (car (cdr thing)))
 (defun caar (thing) (car (car thing)))
 (defun cdar (thing) (cdr (car thing)))
@@ -215,6 +216,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
 (defun cddar (thing) (cdr (cdar thing)))
 (defun cadddr (thing) (car (cdddr thing)))
 (defun caadar (thing) (car (cadar thing)))
+
 (defun listp (thing)
   (or (consp thing)
       (null thing)))
@@ -421,7 +423,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
 
 (defun map (result-type function first-sequence &rest more-sequences)
   ;; TODO: MAP will be slow when sequences or result sequence are
-  ;; lists due to the use of ELT. 
+  ;; lists due to the use of ELT.
   ((lambda (sequences length)
      ((lambda (new-sequence index)
         (loop
@@ -509,11 +511,10 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
 (defun integer-to-string (integer)
   (map 'string
        #'(lambda (char-code)
-           (code-char (+ (char-code  #\0)
-                         char-code)))
+           (nth char-code '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)))
        ((lambda (digits)
           (loop
-             (setq digits (cons (mod integer 10)                           
+             (setq digits (cons (mod integer 10)
                                 digits))
              (setq integer (truncate (/ integer 10)))
              (if (<= integer 0)
@@ -557,7 +558,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
                              ,@body)
                            ,args-name))
                  (position '&body lambda-list))
-                `(apply (lambda (,args-name ,(first lambda-list))             
+                `(apply (lambda (,args-name ,(first lambda-list))
                           ,(expand-macro args-name (rest lambda-list) body))
                         (rest ,args-name) (first ,args-name) nil)))))
 
@@ -766,9 +767,6 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
                  ((null (cddr x)) (rplacd x (cadr x))))
              (cons arg others)))))
 
-(defun whitespacep (char)
-  (member char '(#\Space #\Tab) :test #'char=))
-
 (defmacro dotimes ((var count &optional result) &body body)
   (let ((gcount (gensym)))
     `(let ((,gcount ,count)
@@ -838,6 +836,10 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
   ;; TODO: replace this with a real EOF error at some point
   (error "end of file!"))
 
+(defun throw-reader-error ()
+  ;; TODO: replace this with a real reader error
+  (error "reader error"))
+
 (defvar *standard-input* nil)
 (defvar *standard-output* (make-string-output-stream))
 
@@ -849,6 +851,10 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
 
 (defun write-char (character &optional (stream *standard-output*))
   (funcall stream :write-char character stream))
+
+(defun eofp (stream)
+  (let ((eof (gensym)))
+    (eq eof (peek-char nil stream nil eof))))
 
 (defun make-string-input-stream (string &optional (start 0) end)
   (let ((string (subseq string start end))
@@ -930,7 +936,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
 
 (defun single-quote-reader (stream char)
   (declare (ignore char))
-  (list 'quote (read stream t nil t)))
+  (list 'quote (cl:read stream t nil t)))
 (set-macro-character #\' #'single-quote-reader)
 
 (defun semicolon-reader (stream char)
@@ -1277,31 +1283,455 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
 ;;;; END OF BACKQUOTE ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;; constituent traits ;;;;
+(defvar *constituent-traits* '(alphabetic digit package-marker plus-sign minus-sign dot decimal-point ratio-marker exponent-marker invalid))
+
+(defvar *syntax-types* '((#\Backspace  constituent)               (#\Tab        whitespace)
+                         (#\Newline    whitespace)                (#\Linefeed   whitespace)
+                         (#\Page       whitespace)                (#\Return     whitespace)
+                         (#\Space      whitespace)                (#\!          constituent)
+                         (#\"          terminating-macro-char)    (#\#          non-terminating-macro-char)
+                         (#\$          constituent)               (#\%          constituent)
+                         (#\&          constituent)               (#\'          terminating-macro-char)
+                         (#\(          terminating-macro-char)    (#\)          terminating-macro-char)
+                         (#\*          constituent)               (#\+          constituent)
+                         (#\,          terminating-macro-char)    (#\-          constituent)
+                         (#\.          constituent)               (#\/          constituent)
+                         (#\0          constituent)               (#\1          constituent)
+                         (#\2          constituent)               (#\3          constituent)
+                         (#\4          constituent)               (#\5          constituent)
+                         (#\6          constituent)               (#\7          constituent)
+                         (#\8          constituent)               (#\9          constituent)
+                         (#\:          constituent)               (#\;          terminating-macro-char)
+                         (#\<          constituent)               (#\=          constituent)
+                         (#\>          constituent)               (#\?          constituent)
+                         (#\@          constituent)               (#\A          constituent)
+                         (#\B          constituent)               (#\C          constituent)
+                         (#\D          constituent)               (#\E          constituent)
+                         (#\F          constituent)               (#\G          constituent)
+                         (#\H          constituent)               (#\I          constituent)
+                         (#\J          constituent)               (#\K          constituent)
+                         (#\L          constituent)               (#\M          constituent)
+                         (#\N          constituent)               (#\O          constituent)
+                         (#\P          constituent)               (#\Q          constituent)
+                         (#\R          constituent)               (#\S          constituent)
+                         (#\T          constituent)               (#\U          constituent)
+                         (#\V          constituent)               (#\W          constituent)
+                         (#\X          constituent)               (#\Y          constituent)
+                         (#\Z          constituent)               (#\[          constituent)
+                         (#\\          single-escape)             (#\]          constituent)
+                         (#\^          constituent)               (#\_          constituent)
+                         (#\`          terminating-macro-char)    (#\a          constituent)
+                         (#\b          constituent)               (#\c          constituent)
+                         (#\d          constituent)               (#\e          constituent)
+                         (#\f          constituent)               (#\g          constituent)
+                         (#\h          constituent)               (#\i          constituent)
+                         (#\j          constituent)               (#\k          constituent)
+                         (#\l          constituent)               (#\m          constituent)
+                         (#\n          constituent)               (#\o          constituent)
+                         (#\p          constituent)               (#\q          constituent)
+                         (#\r          constituent)               (#\s          constituent)
+                         (#\t          constituent)               (#\u          constituent)
+                         (#\v          constituent)               (#\w          constituent)
+                         (#\x          constituent)               (#\y          constituent)
+                         (#\z          constituent)               (#\{          constituent)
+                         (#\|          multiple-escape)           (#\}          constituent)
+                         (#\~          constituent)               (#\Rubout     constituent)))
+
+(defvar *char-traits* '((#\Backspace . (invalid))                                 (#\Tab      . (invalid))
+                        (#\Newline   . (invalid))                                 (#\Linefeed . (invalid))
+                        (#\Page      . (invalid))                                 (#\Return   . (invalid))
+                        (#\Space     . (invalid))                                 (#\!        . (alphabetic))
+                        (#\"         . (alphabetic))                              (#\#        . (alphabetic))
+                        (#\$         . (alphabetic))                              (#\%        . (alphabetic))
+                        (#\&         . (alphabetic))                              (#\'        . (alphabetic))
+                        (#\(         . (alphabetic))                              (#\)        . (alphabetic))
+                        (#\*         . (alphabetic))                              (#\,        . (alphabetic))
+                        (#\0         . (alphadigit))                              (#\1        . (alphadigit))
+                        (#\2         . (alphadigit))                              (#\3        . (alphadigit))
+                        (#\4         . (alphadigit))                              (#\5        . (alphadigit))
+                        (#\6         . (alphadigit))                              (#\7        . (alphadigit))
+                        (#\8         . (alphadigit))                              (#\9        . (alphadigit))
+                        (#\:         . (package-marker))                          (#\;        . (alphabetic))
+                        (#\<         . (alphabetic))                              (#\=        . (alphabetic))
+                        (#\>         . (alphabetic))                              (#\?        . (alphabetic))
+                        (#\@         . (alphabetic))                              (#\[        . (alphabetic))
+                        (#\\         . (alphabetic))                              (#\]        . (alphabetic))
+                        (#\^         . (alphabetic))                              (#\_        . (alphabetic))
+                        (#\`         . (alphabetic))                              (#\|        . (alphabetic))
+                        (#\~         . (alphabetic))                              (#\{        . (alphabetic))
+                        (#\}         . (alphabetic))                              (#\+        . (alphabetic plus-sign))
+                        (#\-         . (alphabetic minus-sign))                   (#\.        . (alphabetic dot decimal-point))
+                        (#\/         . (alphabetic ratio-marker))                 (#\A        . (alphadigit))
+                        (#\B         . (alphadigit))                              (#\C        . (alphadigit))
+                        (#\D         . (alphadigit double-float exponent-marker)) (#\E        . (alphadigit float exponent-marker))
+                        (#\F         . (alphadigit single-float exponent-marker)) (#\G        . (alphadigit))
+                        (#\H         . (alphadigit))                              (#\I        . (alphadigit))
+                        (#\J         . (alphadigit))                              (#\K        . (alphadigit))
+                        (#\L         . (alphadigit long-float exponent-marker))   (#\M        . (alphadigit))
+                        (#\N         . (alphadigit))                              (#\O        . (alphadigit))
+                        (#\P         . (alphadigit))                              (#\Q        . (alphadigit))
+                        (#\R         . (alphadigit))                              (#\S        . (alphadigit short-float exponent-marker))
+                        (#\T         . (alphadigit))                              (#\U        . (alphadigit))
+                        (#\V         . (alphadigit))                              (#\W        . (alphadigit))
+                        (#\X         . (alphadigit))                              (#\Y        . (alphadigit))
+                        (#\z         . (alphadigit))                              (#\a        . (alphadigit))
+                        (#\b         . (alphadigit))                              (#\c        . (alphadigit))
+                        (#\d         . (alphadigit double-float exponent-marker)) (#\e        . (alphadigit float exponent-marker))
+                        (#\f         . (alphadigit single-float exponent-marker)) (#\g        . (alphadigit))
+                        (#\h         . (alphadigit))                              (#\i        . (alphadigit))
+                        (#\j         . (alphadigit))                              (#\k        . (alphadigit))
+                        (#\l         . (alphadigit long-float exponent-marker))   (#\m        . (alphadigit))
+                        (#\n         . (alphadigit))                              (#\o        . (alphadigit))
+                        (#\p         . (alphadigit))                              (#\q        . (alphadigit))
+                        (#\r         . (alphadigit))                              (#\s        . (alphadigit short-float exponent-marker))
+                        (#\t         . (alphadigit))                              (#\u        . (alphadigit))
+                        (#\v         . (alphadigit))                              (#\w        . (alphadigit))
+                        (#\x         . (alphadigit))                              (#\y        . (alphadigit))
+                        (#\z         . (alphadigit))                              (#\Rubout   . (invalid))))
+
+(defun char-traits (char)
+  (cdr (cl:assoc char *char-traits*)))
+
+(defun whitespacep (char)
+  (equal 'whitespace (cadr (cl:assoc char *syntax-types*))))
+
+(defun constituentp (char)
+  (equal 'constituent (cadr (cl:assoc char *syntax-types*))))
+
+(defun single-escape-p (char)
+  (equal 'single-escape (cadr (cl:assoc char *syntax-types*))))
+
+(defun multiple-escape-p (char)
+  (equal 'multiple-escape (cadr (cl:assoc char *syntax-types*))))
+
+(defun invalidp (char)
+  (member 'invalid (cdr (cl:assoc char *char-traits*))))
+
+(defun plus-sign-p (char)
+  (member 'plus-sign (cdr (cl:assoc char *char-traits*))))
+
+(defun minus-sign-p (char)
+  (member 'minus-sign (cdr (cl:assoc char *char-traits*))))
+
+(defun signp (char)
+  (or (plus-sign-p char)
+      (minus-sign-p char)))
+
+(defun decimal-dot-p (char)
+  (member 'decimal-point (cdr (cl:assoc char *char-traits*))))
+
+(defun non-terminating-macro-char-p (char)
+  (equal 'non-terminating-macro-char (cadr (cl:assoc char *syntax-types*))))
+
+(defun terminating-macro-char-p (char)
+  (equal 'terminating-macro-char (cadr (cl:assoc char *syntax-types*))))
+
+(defun maybe-change-case (char)
+  ;; TODO: implement readcase here
+  char)
+
+(defvar *read-base* 10)
+
+(defun digits-for-radix (radix)
+  "returns the valid char digits for the given radix.  Radix can be
+  between 2 and 36 and the char values are 0-9, A-Z (case
+  insensitive)."
+  (unless (and (>= radix 2) (<= radix 36))
+    (error "invalid radix"))
+  (let ((all-digits '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
+                      #\A #\B #\C #\D #\E #\F #\G #\H #\I #\J
+                      #\K #\L #\M #\N #\O #\P #\Q #\R #\S #\T
+                      #\U #\V #\W #\X #\Y #\Z)))
+    (subseq all-digits 0 radix)))
+
+(defun digit-char (weight &optional (radix 10))
+  (nth weight (digits-for-radix radix)))
+
+(defun digit-char-p (char &optional (radix 10))
+  (position char (digits-for-radix radix)))
+
+(defun make-integer (sign digits radix)
+  (let ((int 0))
+    (loop
+       (unless digits
+         (return (if (minus-sign-p sign)
+                     (- int)
+                     int)))
+       (setq int (+ (* radix int)
+                    (digit-char-p (car digits))))
+       (pop digits))))
+
+(defun radix-integer-token-p (token radix require-trailing-dot)
+  (let ((sign nil)
+        (digits nil))
+    (when (signp (car token))
+      (setq sign (car token))
+      (pop token))
+    (loop
+       (cond ((not token)
+              (return t))
+             ((not (digit-char-p (car token) radix))
+              (return nil))
+             (t
+              (push (car token) digits)
+              (pop token))))
+    
+    (when
+        (cond (require-trailing-dot
+               (cond ((decimal-dot-p (car token))
+                      (pop token)
+                      (not token))
+                     (t nil)))
+              (t (not token)))
+      (make-integer sign (reverse digits) radix))))
+
+(defun integer-token-p (token)
+  (or (radix-integer-token-p token 10 t)
+      (radix-integer-token-p token *read-base* nil)))
+
+(defun float-token-p (token)
+  )
+
+(defun ratio-token-method-1-p (token)
+  (let ((sign nil)
+        (major-digits nil)
+        (minor-digits nil)
+        (exponent nil))
+    ;; read an optional sign
+    (when (signp (car token))
+      (setq sign (car token))
+      (pop token))
+    ;; read zero or more decimal digits
+
+    ;; read a required decimal point
+
+    ;; read one or more decimal digits
+
+    ;; read optional exponent
+    ))
+
+(defun ratio-token-method-2-p (token)
+  (let ((sign nil)
+        (major-digits nil)
+        (minor-digits nil)
+        (exponent nil))
+    ;; read an optional sign
+
+    ;; read one or more decimal digits
+
+    ;; read an optional decimal point
+
+    ;; read zero or more decimal digits
+
+    ;; read a required exponent
+    ))
+
+(defun ratio-token-p (token)
+  (or (ratio-token-method-1-p token)
+      (ratio-token-method-2-p token)))
+
+(defun numeric-token-p (token)
+  (or (integer-token-p token)
+      (float-token-p token)
+      (ratio-token-p token)))
+
+(defun token-to-object (token)
+  ;; TODO: convert a token read by the reader to a number or a symbol
+  (or (numeric-token-p token)
+      (symbol-token-p token)))
+
 (defun read (&optional (stream *standard-input*) (eof-error-p t) eof-value recursive-p)
   ;; the reader algorithm is defined here:
   ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_b.htm
-  (let ((token-chars nil))
-    (labels ((read-token ()
-               ))
-      (loop
-         (let ((char (read-char stream nil nil)))
-           (cond ((not char)
-                  (if eof-error-p
-                      (throw-eof-error)
-                      (return eof-value)))
-                 ((whitespacep char) nil)
-                 (t (let ((macro-character-function (get-macro-character char)))
-                      (cond (macro-character-function
-                             (let ((values (multiple-value-list (funcall macro-character-function stream char))))
-                               (cond ((null values) ;; loop
-                                      )
-                                     (t ;; at least one value was returned
-                                      (return (car values))))))
-                            ((char= #\\) (let ((char (read-char stream nil nil)))
-                                           ;; TODO throw a real end-of-file error
-                                           (unless char (throw-eof-error))
-                                           ;; TODO do more stuff
-                                           (push char token-chars)
-                                           (read-token)))
-                            (t ;; TODO
-                             ))))))))))
+  ;;
+  ;; Another useful link:
+  ;; http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node190.html
+  (let ((state 1)
+        (x nil)
+        (token-chars nil))
+    (loop
+       (case state
+         ;; 1. If at end of file, end-of-file processing is performed as
+         ;; specified in read. Otherwise, one character, x, is read from
+         ;; the input stream, and dispatched according to the syntax
+         ;; type of x to one of steps 2 to 7.
+         (1 (cond ((eofp stream)
+                   (if eof-error-p
+                       (throw-eof-error)
+                       (return eof-value)))
+                  (t (setf x (read-char stream nil nil))
+                     (setq state 2))))
+         ;; 2. If x is an invalid character, an error of type
+         ;; reader-error is signaled.
+         (2 (cond ((and (not (whitespacep x))
+                        (invalidp x))
+                   (throw-reader-error))
+                  (t (setq state 3))))
+         ;; 3. If x is a whitespace[2] character, then it is discarded
+         ;; and step 1 is re-entered.
+         (3 (cond ((whitespacep x)
+                   (setq state 1))
+                  (t (setq state 4))))
+         ;; 4. If x is a terminating or non-terminating macro
+         ;; character then its associated reader macro function is
+         ;; called with two arguments, the input stream and x.
+         (4 (let ((macro-character-function (get-macro-character x)))
+              (cond (macro-character-function
+                     ;; The reader macro function may return zero
+                     ;; values or one value. If one value is returned,
+                     ;; then that value is returned as the result of
+                     ;; the read operation; the algorithm is done. If
+                     ;; zero values are returned, then step 1 is
+                     ;; re-entered.
+                     (let ((values (multiple-value-list (funcall macro-character-function stream x))))
+                       (cond ((null values)
+                              (setq state 1))
+                             (t ;; at least one value was returned
+                              (return (car values))))))
+                    (t (setq state 5)))))
+         ;; 5. If x is a single escape character then the next
+         ;; character, y, is read, or an error of type end-of-file is
+         ;; signaled if at the end of file. y is treated as if it is a
+         ;; constituent whose only constituent trait is
+         ;; alphabetic[2]. y is used to begin a token, and step 8 is
+         ;; entered.
+         (5 (cond ((single-escape-p x)
+                   (let ((y (read-char stream nil nil)))
+                     ;; TODO throw a real end-of-file error
+                     (unless y (throw-eof-error))
+                     ;; TODO do more stuff
+                     (push y token-chars)
+                     (setq state 8)))
+                  (t (setq state 6))))
+         ;; 6. If x is a multiple escape character then a token
+         ;; (initially containing no characters) is begun and step 9
+         ;; is entered.
+         (6 (cond ((multiple-escape-p x)
+                   ;; TODO: implement multiple escape characters
+                   (error "implement me!"))
+                  (t (setq state 7))))
+         ;; 7. If x is a constituent character, then it begins a
+         ;; token. After the token is read in, it will be interpreted
+         ;; either as a Lisp object or as being of invalid syntax. If
+         ;; the token represents an object, that object is returned as
+         ;; the result of the read operation. If the token is of
+         ;; invalid syntax, an error is signaled. If x is a character
+         ;; with case, it might be replaced with the corresponding
+         ;; character of the opposite case, depending on the readtable
+         ;; case of the current readtable, as outlined in Section
+         ;; 23.1.2 (Effect of Readtable Case on the Lisp Reader). X is
+         ;; used to begin a token, and step 8 is entered.
+         (7 (cond ((constituentp x)
+                   (push (maybe-change-case x) token-chars)
+                   (setq state 8))
+                  (t (error "how did we get here?"))))
+         ;; 8. At this point a token is being accumulated, and an even
+         ;; number of multiple escape characters have been
+         ;; encountered. If at end of file, step 10 is
+         ;; entered. Otherwise, a character, y, is read, and one of
+         ;; the following actions is performed according to its syntax
+         ;; type:
+         (8 (let ((y (read-char stream nil nil)))
+              (cond
+                ((not y)
+                 (setq state 10))
+                ;; If y is a constituent or non-terminating macro
+                ;; character:
+                ((or (constituentp y)
+                     (non-terminating-macro-char-p y))
+                 ;; -- If y is a character with case, it might be
+                 ;; replaced with the corresponding character of the
+                 ;; opposite case, depending on the readtable case of
+                 ;; the current readtable, as outlined in Section
+                 ;; 23.1.2 (Effect of Readtable Case on the Lisp
+                 ;; Reader).
+                 ;; -- Y is appended to the token being built.
+                 (push (maybe-change-case y) token-chars)
+                 ;; -- Step 8 is repeated. 
+                 (setq state 8))
+                ;; If y is a single escape character, then the next
+                ;; character, z, is read, or an error of type
+                ;; end-of-file is signaled if at end of file. Z is
+                ;; treated as if it is a constituent whose only
+                ;; constituent trait is alphabetic[2]. Z is appended
+                ;; to the token being built, and step 8 is repeated.
+                ((single-escape-p y)
+                 (let ((z (read-char stream nil nil)))
+                   (unless z (throw-eof-error))
+                   (push z token-chars)
+                   (setq state 8)))
+                ;; If y is a multiple escape character, then step 9 is
+                ;; entered.
+                ((multiple-escape-p y)
+                 (setq state 9))
+                ;; If y is an invalid character, an error of type
+                ;; reader-error is signaled.
+                ((invalidp y)
+                 (throw-reader-error))
+                ;; If y is a terminating macro character, then it
+                ;; terminates the token. First the character y is
+                ;; unread (see unread-char), and then step 10 is
+                ;; entered.
+                ((terminating-macro-char-p y)
+                 (unread-char y stream)
+                 (setq state 10))
+                ;;  If y is a whitespace[2] character, then it
+                ;;  terminates the token. First the character y is
+                ;;  unread if appropriate (see
+                ;;  read-preserving-whitespace), and then step 10 is
+                ;;  entered.
+                ((whitespacep y)
+                 ;; TODO: maybe preserve whitespace here.
+                 (unread-char y stream)
+                 (setq state 10))
+                (t (error "this shouldnt happen")))))
+         ;; 9. At this point a token is being accumulated, and an odd
+         ;; number of multiple escape characters have been
+         ;; encountered. If at end of file, an error of type
+         ;; end-of-file is signaled. Otherwise, a character, y, is
+         ;; read, and one of the following actions is performed
+         ;; according to its syntax type:
+         (9 (let ((y (read-char stream nil nil)))
+              (cond ((not y)
+                     (throw-eof-error))
+                    ;; If y is a constituent, macro, or whitespace[2]
+                    ;; character, y is treated as a constituent whose
+                    ;; only constituent trait is alphabetic[2]. Y is
+                    ;; appended to the token being built, and step 9
+                    ;; is repeated.
+                    ((or (constituentp y)
+                         (get-macro-character y)
+                         (whitespacep y))
+                     (push y token-chars)
+                     (setq state 9))
+                    ;; If y is a single escape character, then the
+                    ;; next character, z, is read, or an error of type
+                    ;; end-of-file is signaled if at end of file. Z is
+                    ;; treated as a constituent whose only constituent
+                    ;; trait is alphabetic[2]. Z is appended to the
+                    ;; token being built, and step 9 is repeated.
+                    ((single-escape-p y)
+                     (let ((z (read-char stream nil nil)))
+                       (unless z (throw-eof-error))
+                       (push z token-chars)
+                       (setq state 9)))
+                    ;; If y is a multiple escape character, then step
+                    ;; 8 is entered.
+                    ((multiple-escape-p y)
+                     (setq state 8))
+                    ;; If y is an invalid character, an error of type
+                    ;; reader-error is signaled.
+                    ((invalidp y)
+                     (throw-reader-error))
+                    (t (error "this shouldnt happen")))))
+         ;; 10. An entire token has been accumulated. The object
+         ;; represented by the token is returned as the result of the
+         ;; read operation, or an error of type reader-error is
+         ;; signaled if the token is not of valid syntax.
+         (10 (return (token-to-object (reverse token-chars))))))))
+
+(defun read-from-string (string &optional (eof-error-p t) eof-value &key (start 0) end preserve-whitespace)
+  (declare (ignore preserve-whitespace))
+  (let ((stream (make-string-input-stream string start end)))
+    (read stream eof-error-p eof-value)))

@@ -225,3 +225,16 @@
 (assert-true (some #'= '(1 2 3 4 5) '(5 4 3 2 1)))
 (assert-false (notevery #'< '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)))
 (assert-true (notany #'> '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)))
+
+;;;; READER ;;;;
+
+(assert-eq 101 (read-from-string "101"))
+(assert-eq 101 (read-from-string "101."))
+
+(assert-eq 201 (let ((*read-base* 16)) 
+                 (read-from-string "201.")))
+
+(assert-eq 513 (let ((*read-base* 16)) 
+                 (read-from-string "201")))
+
+(assert-eq 1.0 (read-from-string "1.0"))
