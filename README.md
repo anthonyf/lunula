@@ -12,7 +12,7 @@ The Plan:
 - Implement reader
 - Implement anything else needed for compiler
 - Implement Lisp to JS compiler
-- Implment printer
+- Implement printer
 - When Javacript code boots, copy LUNULA namespace to COMMON-LISP namespace
 - Compile lunula.lisp again with itself, to validate self-hosting.
 
@@ -26,5 +26,5 @@ Initial Limitations:
 
 Future Possibilities:
 =====================
-- Implement CLOS with Practical Common Loops
+- Implement CLOS with Portable Common Loops?
 - Compile to other languages, like C# or actionscript.  The goal is for compilation to other languages to be a mostly trival task.
