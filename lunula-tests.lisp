@@ -237,4 +237,30 @@
 (assert-eq 513 (let ((*read-base* 16)) 
                  (read-from-string "201")))
 
-(assert-eq 1.0 (read-from-string "1.0"))
+;; TODO
+;;(assert-eq 1.0 (read-from-string "1.0"))
+
+;;;; FLET ;;;;
+
+
+(assert-eq 30 (flet ((foo (a b)
+                       (+ a b)))
+                (foo 10 20)))
+
+(assert-eq 60 (flet ((foo (a b)
+                       (+ a b))) 
+                (flet ((foo (a b)
+                         (foo (+ a b) (+ a b))))
+                  (foo 10 20))))
+
+;;;; LABELS ;;;;
+
+(assert-eq 55 (labels ((fib (n)
+                         (cond ((= n 0) 0)
+                               ((= n 1) 1)
+                               (t (+ (fib (- n 1))
+                                     (fib (- n 2)))))))
+                (fib 10)))
+
+
+
