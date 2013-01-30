@@ -1530,10 +1530,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
   (or (radix-integer-token-p token 10 t)
       (radix-integer-token-p token *read-base* nil)))
 
-(defun float-token-p (token)
-  )
-
-(defun ratio-token-method-1-p (token)
+(defun float-token-method-1-p (token)
   (let ((sign nil)
         (major-digits nil)
         (minor-digits nil)
@@ -1544,6 +1541,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
       (pop token))
     ;; read zero or more decimal digits
 
+    
     ;; read a required decimal point
 
     ;; read one or more decimal digits
@@ -1551,7 +1549,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
     ;; read optional exponent
     ))
 
-(defun ratio-token-method-2-p (token)
+(defun float-token-method-2-p (token)
   (let ((sign nil)
         (major-digits nil)
         (minor-digits nil)
@@ -1567,9 +1565,13 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
     ;; read a required exponent
     ))
 
+(defun float-token-p (token)
+  (or (float-token-method-1-p token)
+      (float-token-method-2-p token)))
+
 (defun ratio-token-p (token)
-  (or (ratio-token-method-1-p token)
-      (ratio-token-method-2-p token)))
+  ;; TODO
+  (error "implement me!"))
 
 (defun numeric-token-p (token)
   (or (integer-token-p token)
