@@ -61,7 +61,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
                 #:make-array
                 #:truncate
                 #:values
-                #:multiple-value-list
+                #:multiple-value-call
                 )
   (:export #:nil #:t
            #:eq #:eql #:equal #:equalp #:char-equal #:char= #:string=
@@ -121,7 +121,10 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
            #:some #:every #:notevery #:notany
            #:digit-char #:digit-char-p
            #:read #:read-from-string
-           #:macroexpand-1))
+           #:macroexpand-1
+           #:values #:values-list
+           #:multiple-value-call #:multiple-value-bind #:multiple-value-list
+           ))
 
 (defpackage :lunula-user
   (:use :lunula))
@@ -826,6 +829,24 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
             (return ,result))
           (setq ,var (pop ,glist))
           ,@body))))
+
+(defmacro multiple-value-bind ((&rest vars) values-form &rest body)
+  ;; TODO: handle declare form
+  (cond ((null vars)
+         `(progn
+            ,values-form
+            ,@body))
+        (t (let ((rest (gensym)))
+             `(multiple-value-call #'(lambda (&optional ,@vars &rest ,rest)
+                                       (declare (ignore ,rest))
+                                       ,@body)
+                ,values-form)))))
+
+(defmacro multiple-value-list (form)
+  `(multiple-value-call #'list ,form))
+
+(defun values-list (list)
+  (apply #'values list))
 
 (defun some (pred first-seq &rest more-seqs)
   (let ((length (length first-seq))

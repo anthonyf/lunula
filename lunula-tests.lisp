@@ -259,5 +259,14 @@
                                      (fib (- n 2)))))))
                 (fib 10)))
 
+;;; MULTIPLE-VALUE-BIND
 
+(assert-equal '(1 2 3)
+              (multiple-value-bind (a b c)
+                  (values 1 2 3)
+                (list a b c)))
+
+(assert-false (multiple-value-bind ()
+                  (values-list (list 1 2 3))
+                nil))
 
