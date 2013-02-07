@@ -216,8 +216,8 @@
 ;;;; NRECONC ;;;;
 
 (assert-equal '(3 2 1 A B C)
-              (let ((list-1 '(1 2 3))
-                    (list-2 '(a b c)))
+              (let ((list-1 (list 1 2 3))
+                    (list-2 (list 'a 'b 'c)))
                 (nreconc list-1 list-2)))
 
 ;;;; EVERY, SOME, NOTEVERY, NOTANY ;;;;
