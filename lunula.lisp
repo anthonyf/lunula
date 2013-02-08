@@ -1523,13 +1523,22 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
                     (digit-char-p (car digits))))
        (pop digits))))
 
+(defmacro maybe-eat-sign (sign token)
+  `(when (signp (car ,token))
+     (setq ,sign (car ,token))
+     (pop ,token)))
+
+(defmacro eat-dot (token)
+  `(cond ((decimal-dot-p (car ,token))
+          (pop ,token)
+          (not ,token))
+         (t nil)))
+
 (defun radix-integer-token-p (token radix require-trailing-dot)
   (let ((sign nil)
         (digits nil))
-    (when (signp (car token))
-      (setq sign (car token))
-      (pop token))
     (loop
+       (maybe-eat-sign sign token)
        (cond ((not token)
               (return t))
              ((not (digit-char-p (car token) radix))
@@ -1540,10 +1549,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
     
     (when
         (cond (require-trailing-dot
-               (cond ((decimal-dot-p (car token))
-                      (pop token)
-                      (not token))
-                     (t nil)))
+               (eat-dot token))
               (t (not token)))
       (make-integer sign (reverse digits) radix))))
 
@@ -1557,9 +1563,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
         (minor-digits nil)
         (exponent nil))
     ;; read an optional sign
-    (when (signp (car token))
-      (setq sign (car token))
-      (pop token))
+    (maybe-eat-sign sign token)
     ;; read zero or more decimal digits
 
     
