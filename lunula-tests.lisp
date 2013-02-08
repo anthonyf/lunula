@@ -19,24 +19,23 @@
 (cl:in-package #-lunula-test-use-cl :lunula-tests
                #+lunula-test-use-cl :lunula-tests-cl)
 
+(defun assert-eq (a b)
+  (assert (eq a b)))
 
-(defmacro assert-eq (a b)
-  `(assert (eq ,a ,b)))
+(defun assert-eql (a b)
+  (assert (eql a b)))
 
-(defmacro assert-eql (a b)
-  `(assert (eql ,a ,b)))
+(defun assert-equal (a b)
+  (assert (equal a b)))
 
-(defmacro assert-equal (a b)
-  `(assert (equal ,a ,b)))
+(defun assert-equalp (a b)
+  (assert (equalp a b)))
 
-(defmacro assert-equalp (a b)
-  `(assert (equalp ,a ,b)))
+(defun assert-true (a)
+  (assert a))
 
-(defmacro assert-true (a)
-  `(assert ,a))
-
-(defmacro assert-false (a)
-  `(assert (not ,a)))
+(defun assert-false (a)
+  (assert (not a)))
 
 ;;;; ATOM ;;;;
 (assert-true (atom 'sss))
