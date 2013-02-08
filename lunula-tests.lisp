@@ -225,20 +225,6 @@
 (assert-false (notevery #'< '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)))
 (assert-true (notany #'> '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)))
 
-;;;; READER ;;;;
-
-(assert-eq 101 (read-from-string "101"))
-(assert-eq 101 (read-from-string "101."))
-
-(assert-eq 201 (let ((*read-base* 16)) 
-                 (read-from-string "201.")))
-
-(assert-eq 513 (let ((*read-base* 16)) 
-                 (read-from-string "201")))
-
-;; TODO
-;;(assert-eq 1.0 (read-from-string "1.0"))
-
 ;;;; FLET ;;;;
 (assert-eq 30 (flet ((foo (a b)
                        (+ a b)))
@@ -269,3 +255,16 @@
                   (values-list (list 1 2 3))
                 nil))
 
+;;;; READER ;;;;
+
+(assert-eq 101 (read-from-string "101"))
+(assert-eq 101 (read-from-string "101."))
+
+(assert-eq 201 (let ((*read-base* 16)) 
+                 (read-from-string "201.")))
+
+(assert-eq 513 (let ((*read-base* 16)) 
+                 (read-from-string "201")))
+
+;; TODO
+;;(assert-eq 1.0 (read-from-string "1.0"))
