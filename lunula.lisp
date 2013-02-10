@@ -100,7 +100,8 @@
            #:values #:values-list
            #:multiple-value-call #:multiple-value-bind #:multiple-value-list
            #:assoc
-           #:char-upcase #:char-downcase))
+           #:char-upcase #:char-downcase
+           #:abs #:expt))
 
 (defpackage :lunula-user
   (:use :lunula))
@@ -868,6 +869,18 @@
        (setf (elt new-seq index)
              (elt sequence (+ index start)))
        (incf index))))
+
+(defun abs (num)
+  (if (< num 0)
+      (* num -1)
+      num))
+
+(defun expt (base power)
+  (let ((num 1)
+        (op (if (< power 0)  #'/ #'*)))
+    (dotimes (i (abs power))
+      (setq num (funcall op num base)))
+    num))
 
 (defun throw-eof-error ()
   ;; TODO: replace this with a real EOF error at some point
