@@ -1560,7 +1560,7 @@
   (cond ((signp (car *token*))
          (setq *sign* (car *token*))
          (pop *token*))
-        (t (setq *sign* '+)))
+        (t (setq *sign* #\+)))
   t)
 
 (defun eat-dot ()
