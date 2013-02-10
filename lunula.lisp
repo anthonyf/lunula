@@ -1552,6 +1552,24 @@
                     (digit-char-p (car digits) radix)))
        (pop digits))))
 
+(defun make-float (sign major-digits minor-digits exponent-sign exponent-digits)
+  (let* ((major (make-integer #\+ major-digits 10))
+         (minor 0.0)
+         (minor-digits (reverse minor-digits))
+         (exp (if exponent-digits
+                  (make-integer exponent-sign exponent-digits 10)
+                  1)))
+    (loop
+       (unless minor-digits
+         (return (let ((num (expt (+ major (* .1 minor))
+                                  exp)))
+                   (if (minus-sign-p sign)
+                       (- num)
+                       num))))
+       (setq minor (+ (* minor .1)
+                      (digit-char-p (car minor-digits) 10)))
+       (pop minor-digits))))
+
 (defvar *token*)
 (defvar *sign*)
 (defvar *digits*)
