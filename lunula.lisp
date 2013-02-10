@@ -1,28 +1,3 @@
-#|
-The Plan:
-- Implement enough Lisp in it's own namespace (LUNULA) to be used to implement a compiler
-  - Make minimal use of the host Lisp
-    - LUNULA pacage will not :use COMMON-LISP, but reference it explicitly.
-  - All code will go in one file: lunula.lisp
-  - Implement DEFMACRO as early as possible
-  - Implement reader
-  - Implement anything else needed for compiler
-- Implement Lisp to JS compiler
-  - When JS code boots, copy LUNULA namespace to COMMON-LISP namespace
-- Compile lunula.lisp with
-
-Limitations:
-- Only simple LOOP supported
-- No TAGBODY GO
-- No CLOS
-- No FORMAT
-- No complex numbers
-
-Helpful links:
-http://home.pipeline.com/~hbaker1/MetaCircular.html
-
-|#
-
 (defpackage :lunula
   ;; Do not import the entire COMMON-LISP package.  Only import
   ;; primitive things that will not be redifened in the LUNULA
