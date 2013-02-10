@@ -124,7 +124,8 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
            #:macroexpand-1
            #:values #:values-list
            #:multiple-value-call #:multiple-value-bind #:multiple-value-list
-           #:assoc))
+           #:assoc
+           #:char-upcase #:char-downcase))
 
 (defpackage :lunula-user
   (:use :lunula))
@@ -1520,6 +1521,34 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
 
 (defun digit-char (weight &optional (radix 10))
   (nth weight (digits-for-radix radix)))
+
+(defun char-upcase (char)
+  (unless (characterp char)
+    ;;TODO: this should throw a type-error
+    (error "char is not of type character"))
+  (let ((cons (assoc char '((#\a . #\A) (#\b . #\B) (#\c . #\C) (#\d . #\D) (#\e . #\E)
+                            (#\f . #\F) (#\g . #\G) (#\h . #\H) (#\i . #\I) (#\j . #\J)
+                            (#\k . #\K) (#\l . #\L) (#\m . #\M) (#\n . #\N) (#\o . #\O)
+                            (#\p . #\P) (#\q . #\Q) (#\r . #\R) (#\s . #\S) (#\t . #\T)
+                            (#\u . #\U) (#\v . #\V) (#\w . #\W) (#\x . #\X) (#\y . #\Y)
+                            (#\z . #\Z)))))
+    (if cons
+        (cdr cons)
+        char)))
+
+(defun char-downcase (char)
+  (unless (characterp char)
+    ;;TODO: this should throw a type-error
+    (error "char is not of type character"))
+  (let ((cons (assoc char '((#\A . #\a) (#\B . #\b) (#\C . #\c) (#\D . #\d) (#\E . #\e)
+                            (#\F . #\f) (#\G . #\g) (#\H . #\h) (#\I . #\i) (#\J . #\j)
+                            (#\K . #\k) (#\L . #\l) (#\M . #\m) (#\N . #\n) (#\O . #\o)
+                            (#\P . #\p) (#\Q . #\q) (#\R . #\r) (#\S . #\s) (#\T . #\t)
+                            (#\U . #\u) (#\V . #\v) (#\W . #\w) (#\X . #\x) (#\Y . #\y)
+                            (#\Z . #\z)))))
+    (if cons
+        (cdr cons)
+        char)))
 
 (defun digit-char-p (char &optional (radix 10))
   (position char (digits-for-radix radix)))
