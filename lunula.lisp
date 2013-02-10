@@ -124,7 +124,7 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
            #:macroexpand-1
            #:values #:values-list
            #:multiple-value-call #:multiple-value-bind #:multiple-value-list
-           ))
+           #:assoc))
 
 (defpackage :lunula-user
   (:use :lunula))
@@ -1451,42 +1451,54 @@ http://home.pipeline.com/~hbaker1/MetaCircular.html
                         (#\x         . (alphadigit))                              (#\y        . (alphadigit))
                         (#\z         . (alphadigit))                              (#\Rubout   . (invalid))))
 
+(defun assoc (item alist &key (key #'identity) (test #'eql) test-not)
+  (when test-not
+    (setq test (complement test-not)))
+  (loop
+     (cond ((null alist)
+            (return nil))
+           ((funcall test
+                     (funcall key (caar alist))
+                     item)
+            (return (car alist)))
+           (t (pop alist)))))
+
 (defun char-traits (char)
-  (cdr (cl:assoc char *char-traits*)))
+  (cdr (assoc char *char-traits*)))
 
 (defun whitespacep (char)
-  (equal 'whitespace (cadr (cl:assoc char *syntax-types*))))
+  (equal 'whitespace (cadr (assoc char *syntax-types*))))
 
 (defun constituentp (char)
-  (equal 'constituent (cadr (cl:assoc char *syntax-types*))))
+  (equal 'constituent (cadr (assoc char *syntax-types*))))
 
 (defun single-escape-p (char)
-  (equal 'single-escape (cadr (cl:assoc char *syntax-types*))))
+  (equal 'single-escape (cadr (assoc char *syntax-types*))))
 
 (defun multiple-escape-p (char)
-  (equal 'multiple-escape (cadr (cl:assoc char *syntax-types*))))
+  (equal 'multiple-escape (cadr (assoc char *syntax-types*))))
 
 (defun invalidp (char)
-  (member 'invalid (cdr (cl:assoc char *char-traits*))))
+  (member 'invalid (cdr (assoc char *char-traits*))))
 
 (defun plus-sign-p (char)
-  (member 'plus-sign (cdr (cl:assoc char *char-traits*))))
+  (member 'plus-sign (cdr (assoc char *char-traits*))))
 
 (defun minus-sign-p (char)
-  (member 'minus-sign (cdr (cl:assoc char *char-traits*))))
+  (member 'minus-sign (cdr (assoc char *char-traits*))))
 
 (defun signp (char)
   (or (plus-sign-p char)
       (minus-sign-p char)))
 
 (defun decimal-dot-p (char)
-  (member 'decimal-point (cdr (cl:assoc char *char-traits*))))
+  (member 'decimal-point (cdr (assoc char *char-traits*))))
 
 (defun non-terminating-macro-char-p (char)
-  (equal 'non-terminating-macro-char (cadr (cl:assoc char *syntax-types*))))
+  (equal 'non-terminating-macro-char (cadr (assoc char *syntax-types*))))
 
 (defun terminating-macro-char-p (char)
-  (equal 'terminating-macro-char (cadr (cl:assoc char *syntax-types*))))
+  (equal 'terminating-macro-char (cadr (assoc char *syntax-types*))))
 
 (defun maybe-change-case (char)
   ;; TODO: implement readcase here

@@ -244,7 +244,7 @@
                                      (fib (- n 2)))))))
                 (fib 10)))
 
-;;; MULTIPLE-VALUE-BIND
+;;;; MULTIPLE-VALUE-BIND ;;;;
 
 (assert-equal '(1 2 3)
               (multiple-value-bind (a b c)
@@ -254,6 +254,13 @@
 (assert-false (multiple-value-bind ()
                   (values-list (list 1 2 3))
                 nil))
+
+;;;; ASSOC ;;;;
+(let ((values '((x . 100) (y . 200) (z . 50))))
+  (assert-eql '(y . 200) (assoc 'y values))
+  (assert-eq nil (assoc 'a values))
+  (assert-eql '(x . 100) (assoc 'x values))
+  (assert-eql '(z . 50) (assoc 'z values)))
 
 ;;;; READER ;;;;
 
