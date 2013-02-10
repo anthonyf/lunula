@@ -273,5 +273,8 @@
 (assert-eq 513 (let ((*read-base* 16)) 
                  (read-from-string "201")))
 
+(assert-eq 2561 (let ((*read-base* 16)) 
+                  (read-from-string "A01")))
+
 ;; TODO
 ;;(assert-eq 1.0 (read-from-string "1.0"))

@@ -1526,7 +1526,7 @@
         char)))
 
 (defun digit-char-p (char &optional (radix 10))
-  (position char (digits-for-radix radix)))
+  (position (char-upcase char) (digits-for-radix radix)))
 
 (defun make-integer (sign digits radix)
   (let ((int 0))
@@ -1536,42 +1536,59 @@
                      (- int)
                      int)))
        (setq int (+ (* radix int)
-                    (digit-char-p (car digits))))
+                    (digit-char-p (car digits) radix)))
        (pop digits))))
 
-(defmacro maybe-eat-sign (sign token)
-  `(when (signp (car ,token))
-     (setq ,sign (car ,token))
-     (pop ,token)))
+(defvar *token*)
+(defvar *sign*)
+(defvar *digits*)
 
-(defmacro eat-dot (token)
-  `(cond ((decimal-dot-p (car ,token))
-          (pop ,token)
-          (not ,token))
-         (t nil)))
+(defun maybe-eat-sign ()
+  (cond ((signp (car *token*))
+         (setq *sign* (car *token*))
+         (pop *token*))
+        (t (setq *sign* '+)))
+  t)
 
-(defun radix-integer-token-p (token radix require-trailing-dot)
-  (let ((sign nil)
-        (digits nil))
+(defun eat-dot ()
+  (cond ((decimal-dot-p (car *token*))
+         (pop *token*)
+         t)
+        (t nil)))
+
+(defun eat-one-digit (radix)
+  (when (digit-char-p (car *token*) radix)
+    (push (car *token*) *digits*)
+    (pop *token*)
+    t))
+
+(defun eat-one-or-more-decimal-digits (radix)
+  (when (eat-one-digit radix)
     (loop
-       (maybe-eat-sign sign token)
-       (cond ((not token)
+       (cond ((not *token*)
               (return t))
-             ((not (digit-char-p (car token) radix))
-              (return nil))
+             ((digit-char-p (car *token*) radix)
+              (push (car *token*) *digits*)
+              (pop *token*))
              (t
-              (push (car token) digits)
-              (pop token))))
-    
-    (when
-        (cond (require-trailing-dot
-               (eat-dot token))
-              (t (not token)))
-      (make-integer sign (reverse digits) radix))))
+              (return t))))))
 
 (defun integer-token-p (token)
-  (or (radix-integer-token-p token 10 t)
-      (radix-integer-token-p token *read-base* nil)))
+  (or (let ((*sign* nil)
+            (*digits* nil)
+            (*token* token))
+        (when (and (maybe-eat-sign)
+                   (eat-one-or-more-decimal-digits 10)
+                   (eat-dot)
+                   (not *token*))
+          (make-integer *sign* (reverse *digits*) 10)))
+      (let ((*sign* nil)
+            (*digits* nil)
+            (*token* token))
+        (when (and (maybe-eat-sign)
+                   (eat-one-or-more-decimal-digits *read-base*)
+                   (not *token*))
+          (make-integer *sign* (reverse *digits*) *read-base*)))))
 
 (defun float-token-method-1-p (token)
   (let ((sign nil)
@@ -1581,7 +1598,6 @@
     ;; read an optional sign
     (maybe-eat-sign sign token)
     ;; read zero or more decimal digits
-
     
     ;; read a required decimal point
 
