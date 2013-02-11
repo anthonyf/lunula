@@ -264,6 +264,7 @@
 
 ;;;; READER ;;;;
 
+;; integer tests
 (assert-eq 101 (read-from-string "101"))
 (assert-eq 101 (read-from-string "101."))
 
