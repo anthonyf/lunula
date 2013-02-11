@@ -1695,21 +1695,27 @@
                           expt-sign expt-digits))))))))
 
 (defun float-token-p (token)
+  ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_cbb.htm
   (or (float-token-method-1-p token)
       (float-token-method-2-p token)))
 
 (defun ratio-token-p (token)
-  ;; TODO
+  ;; TODO implement ratios
   (error "implement me!"))
 
 (defun numeric-token-p (token)
   ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_ca.htm
   (or (integer-token-p token)
       (float-token-p token)
-      (ratio-token-p token)))
+      #+nil(ratio-token-p token)))
+
+(defun symbol-token-p (token)
+  ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_cd.htm
+  (make-symbol (concatenate 'string token)))
 
 (defun token-to-object (token)
-  ;; TODO: convert a token read by the reader to a number or a symbol
+  ;; valid patterns for tokens
+  ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_ce.htm
   (or (numeric-token-p token)
       (symbol-token-p token)))
 
