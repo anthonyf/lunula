@@ -101,7 +101,8 @@
            #:multiple-value-call #:multiple-value-bind #:multiple-value-list
            #:assoc
            #:char-upcase #:char-downcase
-           #:abs #:expt))
+           #:abs #:expt
+           #:plusp #:minusp))
 
 (defpackage :lunula-user
   (:use :lunula))
@@ -874,6 +875,12 @@
   (if (< num 0)
       (* num -1)
       num))
+
+(defun plusp (num)
+  (>= num 0))
+
+(defun minusp (num)
+  (< num 0))
 
 (defun expt (base power)
   (let ((num 1)
