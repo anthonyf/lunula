@@ -1627,21 +1627,47 @@
           (when (and digits (null token))
             (make-integer sign digits *read-base*))))))
 
+(defun eat-exponent (token)
+  (or (cond ((null token)
+             nil)
+            ((or (char-equal #\e (car token))
+                 (char-equal #\E (car token)))
+             (multiple-value-bind (sign token)
+                 (maybe-eat-sign token)
+               (multiple-value-bind (digits token)
+                   (eat-one-or-more-digits token 10)
+                 (when (and digits (null token))
+                   (values sign digits token)))))
+            (t nil))
+      (values nil nil token)))
+
+(defun maybe-eat-dot-and-optional-decimal-digits (token)
+  (multiple-value-bind (dot token)
+      (eat-dot token)
+    (if dot
+        (multiple-value-bind (digits token)
+            (eat-zero-or-more-digits token 10)
+          (values digits token))
+        (values nil token))))
+
 (defun float-token-method-1-p (token)
-  (let ((sign nil)
-        (major-digits nil)
-        (minor-digits nil)
-        (exponent nil))
-    ;; read an optional sign
-    (maybe-eat-sign sign token)
-    ;; read zero or more decimal digits
-    
-    ;; read a required decimal point
-
-    ;; read one or more decimal digits
-
-    ;; read optional exponent
-    ))
+  (multiple-value-bind (sign token)
+      (maybe-eat-sign token)
+    (multiple-value-bind (major-digits token)
+        (eat-zero-or-more-digits token 10)
+      (multiple-value-bind (dot token)
+          (eat-dot token)
+        (when dot
+          (multiple-value-bind (minor-digits token)
+              (eat-one-or-more-digits token 10)
+            (when minor-digits
+              (multiple-value-bind (expt-sign expt-digits token)
+                  (eat-exponent token)
+                (when (null token)
+                  (make-float sign
+                              major-digits
+                              minor-digits
+                              expt-sign expt-digits))))))))))
 
 (defun float-token-method-2-p (token)
   (let ((sign nil)

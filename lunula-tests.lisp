@@ -277,5 +277,13 @@
 (assert-eq 2561 (let ((*read-base* 16)) 
                   (read-from-string "A01")))
 
-;; TODO
-;;(assert-eq 1.0 (read-from-string "1.0"))
+;; float tests
+;; NOTE: these could fail due to precision errors.  Should probably
+;; just comment these out.
+(assert-eq 1.0 (read-from-string "1.0"))
+(assert-eq -.0 (read-from-string "-.0"))
+(assert-eq -.1 (read-from-string "-.1"))
+(assert-eq 10.0 (read-from-string "10.0"))
+(assert-eq 10.01 (read-from-string "10.01"))
+(assert-eq -10.01 (read-from-string "-10.01"))
+(assert-eq .001 (read-from-string ".001"))
