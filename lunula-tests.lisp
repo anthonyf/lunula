@@ -287,3 +287,5 @@
 (assert-eq 10.01 (read-from-string "10.01"))
 (assert-eq -10.01 (read-from-string "-10.01"))
 (assert-eq .001 (read-from-string ".001"))
+(assert-eq 1.23e-8 (cl:read-from-string "123.0e-10"))
+(assert-eq 1200000.0 (read-from-string "12e5"))

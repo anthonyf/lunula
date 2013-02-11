@@ -1679,20 +1679,20 @@
                               expt-sign expt-digits))))))))))
 
 (defun float-token-method-2-p (token)
-  (let ((sign nil)
-        (major-digits nil)
-        (minor-digits nil)
-        (exponent nil))
-    ;; read an optional sign
-
-    ;; read one or more decimal digits
-
-    ;; read an optional decimal point
-
-    ;; read zero or more decimal digits
-
-    ;; read a required exponent
-    ))
+  (multiple-value-bind (sign token)
+      (maybe-eat-sign token)
+    (multiple-value-bind (major-digits token)
+        (eat-one-or-more-digits token 10)
+      (when major-digits
+        (multiple-value-bind (minor-digits token)
+            (maybe-eat-dot-and-optional-decimal-digits token)
+          (multiple-value-bind (expt-sign expt-digits token)
+              (eat-exponent token)
+            (when (and expt-sign expt-digits (null token))
+              (make-float sign
+                          major-digits
+                          minor-digits
+                          expt-sign expt-digits))))))))
 
 (defun float-token-p (token)
   (or (float-token-method-1-p token)
