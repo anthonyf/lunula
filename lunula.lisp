@@ -1566,11 +1566,11 @@
          (minor-digits (reverse minor-digits))
          (exp (if exponent-digits
                   (make-integer exponent-sign exponent-digits 10)
-                  1)))
+                  0)))
     (loop
        (unless minor-digits
-         (return (let ((num (expt (+ major (* .1 minor))
-                                  exp)))
+         (return (let ((num (* (+ major (* .1 minor))
+                               (expt 10 exp))))
                    (if (minus-sign-p sign)
                        (- num)
                        num))))
