@@ -1593,12 +1593,12 @@
   (let ((digits nil))
     (loop
        (cond ((not token)
-              (return (values digits token)))
+              (return (values (reverse digits) token)))
              ((digit-char-p (car token) radix)
               (push (car token) digits)
               (pop token))
              (t
-              (return (values digits token)))))))
+              (return (values (reverse digits) token)))))))
 
 (defun eat-one-or-more-digits (token radix)
   (multiple-value-bind (digit token)
@@ -1606,7 +1606,7 @@
     (if digit
         (multiple-value-bind (digits token)
             (eat-zero-or-more-digits token radix)
-          (values (append digits (list digit))
+          (values (cons digit digits)
                   token))
         (values nil token))))
 
@@ -1619,13 +1619,13 @@
             (multiple-value-bind (dot token)
                 (eat-dot token)
               (when (and dot (not token))
-                (make-integer sign (reverse digits) 10))))))
+                (make-integer sign digits 10))))))
       (multiple-value-bind (sign token)
           (maybe-eat-sign token)
         (multiple-value-bind (digits token)
             (eat-one-or-more-digits token *read-base*)
           (when (and digits (null token))
-            (make-integer sign (reverse digits) *read-base*))))))
+            (make-integer sign digits *read-base*))))))
 
 (defun float-token-method-1-p (token)
   (let ((sign nil)
