@@ -1707,6 +1707,7 @@
       (float-token-method-2-p token)))
 
 (defun ratio-token-p (token)
+  (declare (ignore token))
   ;; TODO implement ratios
   (error "implement me!"))
 
