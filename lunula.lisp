@@ -1460,18 +1460,6 @@
                         (#\x         . (alphadigit))                              (#\y        . (alphadigit))
                         (#\z         . (alphadigit))                              (#\Rubout   . (invalid))))
 
-(defun assoc (item alist &key (key #'identity) (test #'eql) test-not)
-  (when test-not
-    (setq test (complement test-not)))
-  (loop
-     (cond ((null alist)
-            (return nil))
-           ((funcall test
-                     (funcall key (caar alist))
-                     item)
-            (return (car alist)))
-           (t (pop alist)))))
-
 (defun char-traits (char)
   (cdr (assoc char *char-traits*)))
 
