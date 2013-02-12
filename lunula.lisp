@@ -1463,39 +1463,42 @@
 (defun char-traits (char)
   (cdr (assoc char *char-traits*)))
 
+(defun syntax-type (char)
+  (cdr (assoc char *syntax-types*)))
+
 (defun whitespacep (char)
-  (equal 'whitespace (cdr (assoc char *syntax-types*))))
+  (eq 'whitespace (syntax-type char)))
 
 (defun constituentp (char)
-  (equal 'constituent (cdr (assoc char *syntax-types*))))
+  (eq 'constituent (syntax-type char)))
 
 (defun single-escape-p (char)
-  (equal 'single-escape (cdr (assoc char *syntax-types*))))
+  (eq 'single-escape (syntax-type char)))
 
 (defun multiple-escape-p (char)
-  (equal 'multiple-escape (cdr (assoc char *syntax-types*))))
+  (eq 'multiple-escape (syntax-type char)))
 
 (defun invalidp (char)
-  (member 'invalid (cdr (assoc char *char-traits*))))
+  (member 'invalid (char-traits char)))
 
 (defun plus-sign-p (char)
-  (member 'plus-sign (cdr (assoc char *char-traits*))))
+  (member 'plus-sign (char-traits char)))
 
 (defun minus-sign-p (char)
-  (member 'minus-sign (cdr (assoc char *char-traits*))))
+  (member 'minus-sign (char-traits char)))
 
 (defun signp (char)
   (or (plus-sign-p char)
       (minus-sign-p char)))
 
 (defun decimal-dot-p (char)
-  (member 'decimal-point (cdr (assoc char *char-traits*))))
+  (member 'decimal-point (char-traits char)))
 
 (defun non-terminating-macro-char-p (char)
-  (equal 'non-terminating-macro-char (cdr (assoc char *syntax-types*))))
+  (eq 'non-terminating-macro-char (syntax-type char)))
 
 (defun terminating-macro-char-p (char)
-  (equal 'terminating-macro-char (cdr (assoc char *syntax-types*))))
+  (eq 'terminating-macro-char (syntax-type char)))
 
 (defun maybe-change-case (char)
   ;; TODO: implement readcase here
