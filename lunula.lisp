@@ -1478,6 +1478,9 @@
 (defun multiple-escape-p (char)
   (eq 'multiple-escape (syntax-type char)))
 
+(defun exponent-marker-p (char)
+  (member 'exponent-marker (char-traits char)))
+
 (defun invalidp (char)
   (member 'invalid (char-traits char)))
 
@@ -1563,7 +1566,8 @@
                     (digit-char-p (car digits) radix)))
        (pop digits))))
 
-(defun make-float (sign major-digits minor-digits exponent-sign exponent-digits)
+(defun make-float (sign major-digits minor-digits exponent-char exponent-sign exponent-digits)
+  (declare (ignore exponent-char))
   (let* ((major (make-integer #\+ major-digits 10))
          (minor 0.0)
          (minor-digits (reverse minor-digits))
@@ -1641,17 +1645,17 @@
 (defun eat-exponent (token)
   (let ((orig-token token))
     (cond ((null token)
-           (values nil nil orig-token))
-          ((or (char-equal #\e (car token))
-               (char-equal #\E (car token)))
-           (let ((token (cdr token)))
+           (values nil nil nil orig-token))
+          ((exponent-marker-p (car token))
+           (let ((expt-char (car token))
+                 (token (cdr token)))
              (multiple-value-bind (sign token)
                  (maybe-eat-sign token)
                (multiple-value-bind (digits token)
                    (eat-one-or-more-digits token 10)
                  (when (and digits (null token))
-                   (values sign digits token))))))
-          (t (values nil nil orig-token)))))
+                   (values expt-char sign digits token))))))
+          (t (values nil nil nil orig-token)))))
 
 (defun maybe-eat-dot-and-optional-decimal-digits (token)
   (multiple-value-bind (dot token)
@@ -1673,13 +1677,13 @@
           (multiple-value-bind (minor-digits token)
               (eat-one-or-more-digits token 10)
             (when minor-digits
-              (multiple-value-bind (expt-sign expt-digits token)
+              (multiple-value-bind (expt-char expt-sign expt-digits token)
                   (eat-exponent token)
                 (when (null token)
                   (make-float sign
                               major-digits
                               minor-digits
-                              expt-sign expt-digits))))))))))
+                              expt-char expt-sign expt-digits))))))))))
 
 (defun float-token-method-2-p (token)
   (multiple-value-bind (sign token)
@@ -1689,13 +1693,13 @@
       (when major-digits
         (multiple-value-bind (minor-digits token)
             (maybe-eat-dot-and-optional-decimal-digits token)
-          (multiple-value-bind (expt-sign expt-digits token)
+          (multiple-value-bind (expt-char expt-sign expt-digits token)
               (eat-exponent token)
             (when (and expt-sign expt-digits (null token))
               (make-float sign
                           major-digits
                           minor-digits
-                          expt-sign expt-digits))))))))
+                          expt-char expt-sign expt-digits))))))))
 
 (defun float-token-p (token)
   ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_cbb.htm
