@@ -890,6 +890,18 @@
       (setq num (funcall op num base)))
     num))
 
+(defun assoc (item alist &key (key #'identity) (test #'eql) test-not)
+  (when test-not
+    (setq test (complement test-not)))
+  (loop
+     (cond ((null alist)
+            (return nil))
+           ((funcall test
+                     (funcall key (caar alist))
+                     item)
+            (return (car alist)))
+           (t (pop alist)))))
+
 (defun throw-eof-error ()
   ;; TODO: replace this with a real EOF error at some point
   (error "end of file!"))
