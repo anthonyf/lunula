@@ -1478,6 +1478,9 @@
 (defun multiple-escape-p (char)
   (eq 'multiple-escape (syntax-type char)))
 
+(defun package-marker-p (char)
+  (member 'package-marker (char-traits char)))
+
 (defun exponent-marker-p (char)
   (member 'exponent-marker (char-traits char)))
 
