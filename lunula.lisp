@@ -5,7 +5,7 @@
   ;; COMMON-LISP so we can easlily identify it later and implement it
   ;; in the compiler.
   (:import-from :common-lisp
-                #:defpackage #:in-package
+                #:defpackage #:in-package #:*package*
                 #:nil #:t
                 #:otherwise
                 #:eq #:char-equal #:char= #:string-equal #:string=
@@ -28,7 +28,7 @@
                 #:assert #:error
                 #:setq #:setf
                 #:loop ;; only simple loop supported for now
-                #:make-symbol
+                #:make-symbol #:intern
                 #:string #:vector
                 #:defvar #:defparameter
                 #:array-dimension
