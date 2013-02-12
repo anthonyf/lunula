@@ -1723,7 +1723,10 @@
 
 (defun symbol-token-p (token)
   ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_cd.htm
-  (make-symbol (concatenate 'string token)))
+  ;; TODO: implement this
+  #+nil(let ((package *package*)
+             (name nil))
+         (make-symbol (concatenate 'string token))))
 
 (defun token-to-object (token)
   ;; valid patterns for tokens
