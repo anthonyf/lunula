@@ -1714,6 +1714,7 @@
   ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_ca.htm
   (or (integer-token-p token)
       (float-token-p token)
+      ;; TODO implement ratios
       #+nil(ratio-token-p token)))
 
 (defun symbol-token-p (token)
