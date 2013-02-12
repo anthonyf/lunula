@@ -916,6 +916,10 @@
 (defun read-char (&optional (stream *standard-input*) (eof-error-p t) eof-value recursive-p)
   (funcall stream :read-char stream eof-error-p eof-value recursive-p))
 
+(defun unread-char (character &optional (stream *standard-input*))
+  ;; TODO: implement me!
+  (error "implement me!"))
+
 (defun peek-char (&optional peek-type (stream *standard-input*) (eof-error-p t) eof-value recursive-p)
   (funcall stream :peek-char peek-type stream eof-error-p eof-value recursive-p))
 
