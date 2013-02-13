@@ -871,6 +871,19 @@
              (elt sequence (+ index start)))
        (incf index))))
 
+(defun split-list (list token &optional (key #'identity) (test #'eql))
+  (let ((splits nil)
+        (current nil))
+    (dolist (item list)
+      (cond ((funcall test
+                      (funcall key item)
+                      token)
+             (push (reverse current) splits)
+             (setq current nil))
+            (t (push item current))))
+    (push (reverse current) splits)
+    (reverse splits)))
+
 (defun abs (num)
   (if (< num 0)
       (* num -1)
