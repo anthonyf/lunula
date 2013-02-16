@@ -104,7 +104,8 @@
            #:assoc
            #:char-upcase #:char-downcase
            #:abs #:expt
-           #:plusp #:minusp))
+           #:plusp #:minusp
+           #:upper-case-p #:lower-case-p #:both-case-p))
 
 (defpackage :lunula-user
   (:use :lunula))
@@ -1581,6 +1582,23 @@
     (if cons
         (cdr cons)
         char)))
+
+(defun upper-case-p (char)
+  (let ((upcase (char-upcase char))
+        (downcase (char-downcase char)))
+    (and (not (char= upcase downcase))
+       (char= char upcase))))
+
+(defun lower-case-p (char)
+  (let ((upcase (char-upcase char))
+        (downcase (char-downcase char)))
+    (and (not (char= upcase downcase))
+       (char= char downcase))))
+
+(defun both-case-p (char)
+  (let ((upcase (char-upcase char))
+        (downcase (char-downcase char)))
+    (not (char= upcase downcase))))
 
 (defun digit-char-p (char &optional (radix 10))
   (position (char-upcase char) (digits-for-radix radix)))

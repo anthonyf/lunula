@@ -291,3 +291,11 @@
 (assert-eq 1200000.0 (read-from-string "12e5"))
 (assert-eq 1200000.0 (read-from-string "12s5"))
 (assert-eq 1200000.0 (read-from-string "12D5"))
+
+;; char case tests
+(assert-true (upper-case-p #\A))
+(assert-false (upper-case-p #\a))
+(assert-true (both-case-p #\a))
+(assert-false (both-case-p #\5))
+(assert-false (lower-case-p #\5))
+(assert-false (upper-case-p #\5))
