@@ -1591,6 +1591,8 @@
 
 (defun make-float (sign major-digits minor-digits exponent-char exponent-sign exponent-digits)
   (declare (ignore exponent-char))
+  ;; exponent-char determines the size of the float. For now we just
+  ;; make it one size.
   (let* ((major (make-integer #\+ major-digits 10))
          (minor 0.0)
          (minor-digits (reverse minor-digits))
