@@ -5,7 +5,7 @@
   ;; COMMON-LISP so we can easlily identify it later and implement it
   ;; in the compiler.
   (:import-from :common-lisp
-                #:defpackage #:in-package #:*package*
+                #:defpackage #:in-package #:*package* #:find-package #:export
                 #:nil #:t
                 #:otherwise
                 #:eq #:char-equal #:char= #:string-equal #:string=
@@ -28,7 +28,7 @@
                 #:assert #:error
                 #:setq #:setf
                 #:loop ;; only simple loop supported for now
-                #:make-symbol #:intern
+                #:make-symbol #:intern #:symbol-value
                 #:string #:vector
                 #:defvar #:defparameter
                 #:array-dimension
@@ -38,7 +38,8 @@
                 #:values
                 #:multiple-value-call
                 )
-  (:export #:nil #:t
+  (:export #:defpackage #:in-package #:*package* #:find-package #:export
+           #:nil #:t
            #:eq #:eql #:equal #:equalp #:char-equal #:char= #:string=
            #:not #:null
            #:&rest #:&body #:&key #:&optional #:&whole #:&aux
@@ -61,7 +62,8 @@
            #:+ #:- #:* #:/
            #:1+ #:1-
            #:zerop
-           #:consp #:numberp #:characterp
+           #:consp #:numberp #:characterp #:symbolp #:stringp #:arrayp #:vectorp
+           #:aref #:char #:svref
            #:assert #:error
            #:defun #:defmacro
            #:nth #:elt
@@ -72,7 +74,7 @@
            #:member
            #:position
            #:complement
-           #:make-symbol
+           #:make-symbol #:intern #:symbol-value
            #:string
            #:concatenate
            #:princ-to-string
