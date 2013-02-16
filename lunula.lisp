@@ -1798,10 +1798,39 @@
 
 (defun symbol-token-p (token)
   ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_cd.htm
-  ;; TODO: implement this
-  #+nil(let ((package *package*)
-             (name nil))
-         (make-symbol (concatenate 'string token))))
+  (let* ((split (split-list token (package-marker)))
+         (length-of-split (length split)))
+    (case length-of-split
+      (1 (intern (concatenate 'string (car split))
+                 *package*))
+      (2 (multiple-value-bind (package name)
+             (values-list split)
+           (cond ((and name (null package))
+                  (intern (concatenate 'string name)
+                          (find-package "KEYWORD")))
+                 ((and name package)
+                  (let ((symbol-name (concatenate 'string name))
+                        (package-name (concatenate 'string package)))
+                    (multiple-value-bind (symbol status)
+                        (cl:find-symbol symbol-name package-name)
+                      (cond ((eq status :external)
+                             symbol)
+                            (t (error "symbol ~s is not external to package ~s"
+                                      symbol-name package-name))))))
+                 (t (error "invalid package designator")))))
+      (3 (multiple-value-bind (package dummy name)
+             (values-list split)
+           (cond (dummy
+                  (error "invalid symbol"))
+                 ((and (null package) name)
+                  (error "invalid symbol in the form of ::aaaa"))
+                 ((and (null name) package)
+                  (error "invalid symbol in the form of aaaa::"))
+                 ((and package name)
+                  (intern (concatenate 'string name)
+                          (find-package (concatenate 'string package))))
+                 (t (error "invalid symbol")))))
+      (otherwise (error "invalid symbol")))))
 
 (defun token-to-object (token)
   ;; valid patterns for tokens

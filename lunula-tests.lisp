@@ -306,3 +306,13 @@
 (assert-false (both-case-p #\5))
 (assert-false (lower-case-p #\5))
 (assert-false (upper-case-p #\5))
+
+;; symbol tests
+(assert-eq :blah (read-from-string ":BLAH"))
+(assert-eq :BLAH (read-from-string ":blah"))
+(assert-eq :|blah| (read-from-string ":|blah|"))
+(assert-eq 'a|baz|a (read-from-string "a|baz|a"))
+(defpackage "FOO")
+(assert-eq 'FOO::BAR (read-from-string "FOO::BAR"))
+(assert-eq 'FOO::|baz| (read-from-string "FOO::|baz|"))
+
