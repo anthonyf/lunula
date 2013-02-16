@@ -1501,6 +1501,9 @@
 (defun exponent-marker-p (char)
   (member 'exponent-marker (char-traits char)))
 
+(defun ratio-marker-p (char)
+  (member 'ratio-marker (char-traits char)))
+
 (defun invalidp (char)
   (member 'invalid (char-traits char)))
 
@@ -1604,6 +1607,14 @@
        (setq minor (+ (* minor .1)
                       (digit-char-p (car minor-digits) 10)))
        (pop minor-digits))))
+
+(defun make-ratio (sign numerator-digits denominator-digits)
+  (let ((numerator (make-integer sign numerator-digits *read-base*))
+        (denominator (make-integer #\+ denominator-digits *read-base*)))
+    ;; For now we do not support ratios.  We just convert them into
+    ;; floats.
+    (/ (* numerator 1.0)
+       (* denominator 1.0))))
 
 (defun maybe-eat-sign (token)
   (cond ((signp (car token))
@@ -1727,16 +1738,23 @@
       (float-token-method-2-p token)))
 
 (defun ratio-token-p (token)
-  (declare (ignore token))
-  ;; TODO implement ratios
-  (error "implement me!"))
+  (multiple-value-bind (sign token)
+      (maybe-eat-sign token)
+    (multiple-value-bind (numerator-digits token)
+        (eat-one-or-more-digits token *read-base*)
+      (when numerator-digits
+        (when (ratio-marker-p (car token))
+          (let ((token (cdr token)))
+            (multiple-value-bind (denominator-digits token)
+                (eat-one-or-more-digits token *read-base*)
+              (when (and denominator-digits (null token))
+                (make-ratio sign numerator-digits denominator-digits)))))))))
 
 (defun numeric-token-p (token)
   ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_ca.htm
   (or (integer-token-p token)
       (float-token-p token)
-      ;; TODO implement ratios
-      #+nil(ratio-token-p token)))
+      (ratio-token-p token)))
 
 (defun symbol-token-p (token)
   ;; http://www.lispworks.com/documentation/HyperSpec/Body/02_cd.htm
