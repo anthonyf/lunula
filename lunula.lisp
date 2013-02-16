@@ -1500,6 +1500,11 @@
 (defun package-marker-p (char)
   (member 'package-marker (char-traits char)))
 
+(defun package-marker ()
+  (caar (member 'package-marker *char-traits*
+                :key #'cdr
+                :test #'member)))
+
 (defun exponent-marker-p (char)
   (member 'exponent-marker (char-traits char)))
 
