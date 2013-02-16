@@ -262,6 +262,13 @@
   (assert-eql '(x . 100) (assoc 'x values))
   (assert-eql '(z . 50) (assoc 'z values)))
 
+(let ((alist '((1 . "one")(2 . "two")(3 . "three"))))
+  (assert-equal '(2 . "two") (assoc 2 alist))
+
+  (setq alist '(("one" . 1)("two" . 2)))
+  (assert-equalp '("one" . 1) (assoc "one" alist :test #'equalp))
+  (assert-equalp '("two" . 2) (assoc #\o alist :key #'(lambda(x)(char x 2)))))
+
 ;;;; READER ;;;;
 
 ;; integer tests
