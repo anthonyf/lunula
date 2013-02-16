@@ -89,7 +89,7 @@
            #:truncate
            #:read-char #:peek-char #:write-char
            #:*standard-input* #:*standard-output*
-           #:*read-table* #:*read-base*
+           #:*read-table* #:*read-base* #:readtable-case
            #:set-macro-character #:get-macro-character
            #:first #:rest #:second #:third #:last #:butlast
            #:append #:nconc #:nreconc
@@ -1000,8 +1000,12 @@
   ;; TODO: this is fragile.  Use a closure or something instead of a
   ;; list to represent the readtable object.
   (list
-   nil ;; macro characters
+   nil     ;; macro characters
+   :upcase ;; readtable-case
    ))
+
+(defun readtable-case (read-table)
+  (cadr read-table))
 
 (defvar *read-table* (make-default-read-table))
 
@@ -1534,27 +1538,6 @@
 (defun terminating-macro-char-p (char)
   (eq 'terminating-macro-char (syntax-type char)))
 
-(defun maybe-change-case (char)
-  ;; TODO: implement readcase here
-  char)
-
-(defvar *read-base* 10)
-
-(defun digits-for-radix (radix)
-  "returns the valid char digits for the given radix.  Radix can be
-  between 2 and 36 and the char values are 0-9, A-Z (case
-  insensitive)."
-  (unless (and (>= radix 2) (<= radix 36))
-    (error "invalid radix"))
-  (let ((all-digits '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
-                      #\A #\B #\C #\D #\E #\F #\G #\H #\I #\J
-                      #\K #\L #\M #\N #\O #\P #\Q #\R #\S #\T
-                      #\U #\V #\W #\X #\Y #\Z)))
-    (subseq all-digits 0 radix)))
-
-(defun digit-char (weight &optional (radix 10))
-  (nth weight (digits-for-radix radix)))
-
 (defun char-upcase (char)
   (unless (characterp char)
     ;;TODO: this should throw a type-error
@@ -1599,6 +1582,36 @@
   (let ((upcase (char-upcase char))
         (downcase (char-downcase char)))
     (not (char= upcase downcase))))
+
+(defun maybe-change-case (char)
+  (case (readtable-case *read-table*)
+    (:upcase (char-upcase char))
+    (:downcase (char-downcase char))
+    (:preserve char)
+    (:invert (cond ((upper-case-p char)
+                    (char-downcase char))
+                   ((lower-case-p char)
+                    (char-upcase char))
+                   (t char)))
+    (t (error "invalid read case"))))
+
+(defvar *read-base* 10)
+
+(defun digits-for-radix (radix)
+  "returns the valid char digits for the given radix.  Radix can be
+  between 2 and 36 and the char values are 0-9, A-Z (case
+  insensitive)."
+  (unless (and (>= radix 2) (<= radix 36))
+    (error "invalid radix"))
+  (let ((all-digits '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
+                      #\A #\B #\C #\D #\E #\F #\G #\H #\I #\J
+                      #\K #\L #\M #\N #\O #\P #\Q #\R #\S #\T
+                      #\U #\V #\W #\X #\Y #\Z)))
+    (subseq all-digits 0 radix)))
+
+(defun digit-char (weight &optional (radix 10))
+  (nth weight (digits-for-radix radix)))
+
 
 (defun digit-char-p (char &optional (radix 10))
   (position (char-upcase char) (digits-for-radix radix)))
