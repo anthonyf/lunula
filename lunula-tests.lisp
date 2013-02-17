@@ -315,4 +315,4 @@
 (defpackage "FOO")
 (assert-eq 'FOO::BAR (read-from-string "FOO::BAR"))
 (assert-eq 'FOO::|baz| (read-from-string "FOO::|baz|"))
-
+(assert-eq '|FOOabc| (read-from-string "|FOOabc|"))

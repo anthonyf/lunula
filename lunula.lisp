@@ -1905,8 +1905,7 @@
          ;; (initially containing no characters) is begun and step 9
          ;; is entered.
          (6 (cond ((multiple-escape-p x)
-                   ;; TODO: implement multiple escape characters
-                   (error "implement me!"))
+                   (setq state 9))
                   (t (setq state 7))))
          ;; 7. If x is a constituent character, then it begins a
          ;; token. After the token is read in, it will be interpreted
