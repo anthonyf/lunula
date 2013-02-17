@@ -933,8 +933,7 @@
   (funcall stream :read-char stream eof-error-p eof-value recursive-p))
 
 (defun unread-char (character &optional (stream *standard-input*))
-  ;; TODO: implement me!
-  (error "implement me!"))
+  (funcall stream :unread-char character stream))
 
 (defun peek-char (&optional peek-type (stream *standard-input*) (eof-error-p t) eof-value recursive-p)
   (funcall stream :peek-char peek-type stream eof-error-p eof-value recursive-p))
@@ -952,7 +951,12 @@
         (index 0))
     (lambda (op &rest args)
       (case op
-        (:read-char (apply (lambda (stream &optional (eof-error-p t) eof-value recursive-p)
+        (:unread-char (apply (lambda (character stream)
+                               (declare (ignore character stream))
+                               (decf index)
+                               nil)
+                             args))
+        (:read-char (apply (lambda (stream eof-error-p eof-value recursive-p)
                              (declare (ignore stream recursive-p))
                              (cond ((>= index length)
                                     (if eof-error-p
@@ -962,7 +966,7 @@
                                           (char string index)
                                         (incf index)))))
                            args))
-        (:peek-char (apply (lambda (peek-type stream &optional (eof-error-p t) eof-value recursive-p)
+        (:peek-char (apply (lambda (peek-type stream eof-error-p eof-value recursive-p)
                              (declare (ignore stream recursive-p))
                              (when peek-type
                                ;; TODO: support peek type
