@@ -4,6 +4,7 @@
 (load "src/defun.lisp")
 (load "src/bootstrap.lisp")
 (load "src/defmacro.lisp")
+(load "src/destructuring-bind.lisp")
 (load "src/macros.lisp")
 (load "src/let.lisp")
 (load "src/flet-and-labels.lisp")

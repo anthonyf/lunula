@@ -268,6 +268,15 @@
   (assert-equalp '("one" . 1) (assoc "one" alist :test #'equalp))
   (assert-equalp '("two" . 2) (assoc #\o alist :key #'(lambda(x)(char x 2)))))
 
+;;;; DESTRUCTURING-BIND ;;;;
+
+(assert-eq 6 (destructuring-bind (a b c) 
+                 (list 1 2 3)
+               (+ a b c)))
+(assert-eq 150 (destructuring-bind (a &optional (b 20) &key (c 30) (d 40) (e 50))
+                   (list 10)
+                 (+ a b c d e)))
+
 ;;;; DEFSTRUCT ;;;;
 
 (defstruct foo a b c)

@@ -106,6 +106,7 @@
            #:abs #:expt
            #:plusp #:minusp
            #:upper-case-p #:lower-case-p #:both-case-p
+           #:destructuring-bind
            #:defstruct))
 
 (defpackage :lunula-user
