@@ -285,11 +285,17 @@
 
 ;;;; DEFSTRUCT ;;;;
 
-(defstruct foo a b c)
+(defstruct (foo (:type list)) a b c)
 (let ((foo (make-foo :a 10 :b 20 :c 30)))
   (assert-eq 10 (foo-a foo))
   (assert-eq 20 (foo-b foo))
   (assert-eq 30 (foo-c foo)))
+
+(defstruct (foo2 (:type vector)) a b c)
+(let ((foo (make-foo2 :a 10 :b 20 :c 30)))
+  (assert-eq 10 (foo2-a foo))
+  (assert-eq 20 (foo2-b foo))
+  (assert-eq 30 (foo2-c foo)))
 
 ;;;; READER ;;;;
 
