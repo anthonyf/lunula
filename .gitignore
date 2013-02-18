@@ -61,3 +61,8 @@
 /.hg/undo.branch
 /.hg/undo.desc
 /.hg/undo.dirstate
+/load.fasl
+/package.fasl
+/src/defstruct.fasl
+/src/bootstrap.fasl
+/src/package.fasl
