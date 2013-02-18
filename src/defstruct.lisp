@@ -1,17 +1,20 @@
 (in-package :lunula)
 
+(defun defstruct-name-and-options (name-and-options)
+  (cond ((symbolp name-and-options)
+         (list name-and-options nil))
+        ((listp name-and-options)
+         (destructuring-bind (name &rest options)
+             name-and-options
+           (let ((type-option (member :type options :key #'car)))
+             (if type-option
+                 (values name (cadar type-option))
+                 (values name nil)))))
+        (t (error "invalid struct name"))))
+
 (defmacro defstruct (name-and-options &rest slot-descriptions)
-  (destructuring-bind (name type)
-      (cond ((symbolp name-and-options)
-             (list name-and-options nil))
-            ((listp name-and-options)
-             (destructuring-bind (name &rest options)
-                 name-and-options
-               (let ((type-option (member :type options :key #'car)))
-                 (if type-option
-                     (list name (cadar type-option))
-                     (list name nil)))))
-            (t (error "invalid struct name")))
+  (multiple-value-bind (name type)
+      (defstruct-name-and-options name-and-options)
     (let* ((constructor-name (intern (concatenate 'string "MAKE-" (symbol-name name))))
            (slot-names (mapcar (lambda (slot-description)
                                  (cond ((symbolp slot-description)
