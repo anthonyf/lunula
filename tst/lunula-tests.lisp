@@ -268,6 +268,14 @@
   (assert-equalp '("one" . 1) (assoc "one" alist :test #'equalp))
   (assert-equalp '("two" . 2) (assoc #\o alist :key #'(lambda(x)(char x 2)))))
 
+;;;; DEFSTRUCT ;;;;
+
+(defstruct foo a b c)
+(let ((foo (make-foo :a 10 :b 20 :c 30)))
+  (assert-eq 10 (foo-a foo))
+  (assert-eq 20 (foo-b foo))
+  (assert-eq 30 (foo-c foo)))
+
 ;;;; READER ;;;;
 
 ;; integer tests

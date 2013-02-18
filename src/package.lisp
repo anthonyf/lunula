@@ -28,7 +28,7 @@
                 #:assert #:error
                 #:setq #:setf
                 #:loop ;; only simple loop supported for now
-                #:make-symbol #:intern #:symbol-value
+                #:make-symbol #:intern #:symbol-value #:symbol-name
                 #:string #:vector
                 #:defvar #:defparameter
                 #:array-dimension
@@ -74,7 +74,7 @@
            #:member
            #:position
            #:complement
-           #:make-symbol #:intern #:symbol-value
+           #:make-symbol #:intern #:symbol-value #:symbol-name
            #:string
            #:concatenate
            #:princ-to-string
@@ -105,7 +105,8 @@
            #:char-upcase #:char-downcase
            #:abs #:expt
            #:plusp #:minusp
-           #:upper-case-p #:lower-case-p #:both-case-p))
+           #:upper-case-p #:lower-case-p #:both-case-p
+           #:defstruct))
 
 (defpackage :lunula-user
   (:use :lunula))
