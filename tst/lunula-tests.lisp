@@ -194,11 +194,17 @@
                        ((1 2 3) 'blah)
                        (10 'hello)
                        (otherwise 'there)))
+
 (assert-equal 'there (case 10
                        ((1 2 3) 'blah)
                        (11 'hello)
                        (otherwise 'there)))
 
+(assert-eq 2 (let ((type 'list))
+               (case type
+                 (vector 1)
+                 (list 2)
+                 (otherwise 3))))
 ;;;; DO ;;;;
 (assert-equal 4 (do ((temp-one 1 (1+ temp-one))
                      (temp-two 0 (1- temp-two)))

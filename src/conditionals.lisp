@@ -22,10 +22,10 @@
        (cond ,@(mapcar (lambda (case)
                          (cond ((listp (car case))
                                 `((or ,@(mapcar (lambda (case)
-                                                  `(eql ,case ,keyform-var))
+                                                  `(eql ',case ,keyform-var))
                                                 (car case)))
                                   ,@(cdr case)))
-                               (t `((eql ,(car case) ,keyform-var)
+                               (t `((eql ',(car case) ,keyform-var)
                                     ,@(cdr case)))))
                        cases)
              ,@(when last-case
