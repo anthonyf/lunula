@@ -297,6 +297,12 @@
   (assert-eq 20 (foo2-b foo))
   (assert-eq 30 (foo2-c foo)))
 
+(defstruct (foo3 (:type vector)) (a 10) (b 20) (c 30))
+(let ((foo (make-foo3 :a 5)))
+  (assert-eq 5 (foo3-a foo))
+  (assert-eq 20 (foo3-b foo))
+  (assert-eq 30 (foo3-c foo)))
+
 ;;;; READER ;;;;
 
 ;; integer tests
