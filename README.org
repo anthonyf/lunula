@@ -2,7 +2,7 @@
 Lunula is a self-hosted Common Lisp to Javascript compiler.
 
 ** The Plan:
-- Implement enough Lisp in it's own namespace (LUNULA) to be used to implement a compiler
+- Implement enough Lisp in it's own package (LUNULA) to be used to implement a compiler
 - Make minimal use of the host Lisp
 - LUNULA package will not :use COMMON-LISP, but reference required primitives explicitly.
 - Implement DEFMACRO as early as possible
@@ -10,7 +10,7 @@ Lunula is a self-hosted Common Lisp to Javascript compiler.
 - Implement anything else needed for compiler
 - Implement Lisp to JS compiler
 - Implement printer
-- When Javacript code boots, copy LUNULA namespace to COMMON-LISP namespace
+- When Javacript code boots, copy LUNULA package to COMMON-LISP package
 - Compile lunula.lisp again with itself, to validate self-hosting.
 
 ** Initial Limitations:
