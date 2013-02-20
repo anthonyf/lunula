@@ -24,6 +24,7 @@
                 #:+ #:- #:* #:/ #:mod
                 #:zerop
                 #:consp #:numberp #:characterp #:symbolp #:stringp #:arrayp #:vectorp
+                :type-of
                 #:aref #:char #:svref
                 #:assert #:error
                 #:setq #:setf
@@ -63,6 +64,7 @@
            #:1+ #:1-
            #:zerop
            #:consp #:numberp #:characterp #:symbolp #:stringp #:arrayp #:vectorp
+           #:type-of
            #:aref #:char #:svref
            #:assert #:error
            #:defun #:defmacro
