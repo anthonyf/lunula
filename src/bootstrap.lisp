@@ -9,13 +9,14 @@
 (defun list (&rest args) args)
 
 (defun eql (a b)
-  (or (eq a b)
-      (and (numberp a)
+  (or (and (numberp a)
            (numberp b)
-           (eq a b))
+           (eql (cl:type-of a) (cl:type-of b))
+           (= a b))
       (and (characterp a)
            (characterp b)
-           (eq a b))))
+           (char= a b))
+      (eq a b)))
 
 (defun caar (thing) (car (car thing)))
 (defun cadr (thing) (car (cdr thing)))
@@ -309,14 +310,14 @@
         0)))
 
 (defun equal (a b)
-  (or (eql a b)
-      (and (consp a)
+  (or (and (consp a)
            (consp b)
            (equal (car a) (car b))
            (equal (cdr a) (cdr b)))
       (and (stringp a)
            (stringp b)
            (string= a b))
+      (eql a b)
       ;; TODO: handle arrays
       ;; TODO: handle pathnames
       ))

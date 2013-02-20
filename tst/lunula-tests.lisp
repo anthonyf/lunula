@@ -321,17 +321,17 @@
 ;; float tests
 ;; NOTE: these could fail due to precision errors.  Should probably
 ;; just comment these out.
-(assert-eq 1.0 (read-from-string "1.0"))
-(assert-eq -.0 (read-from-string "-.0"))
-(assert-eq -.1 (read-from-string "-.1"))
-(assert-eq 10.0 (read-from-string "10.0"))
-(assert-eq 10.01 (read-from-string "10.01"))
-(assert-eq -10.01 (read-from-string "-10.01"))
-(assert-eq .001 (read-from-string ".001"))
-(assert-eq 1.23e-8 (cl:read-from-string "123.0e-10"))
-(assert-eq 1200000.0 (read-from-string "12e5"))
-(assert-eq 1200000.0 (read-from-string "12s5"))
-(assert-eq 1200000.0 (read-from-string "12D5"))
+(assert-eql 1.0 (read-from-string "1.0"))
+(assert-eql -.0 (read-from-string "-.0"))
+(assert-eql -.1 (read-from-string "-.1"))
+(assert-eql 10.0 (read-from-string "10.0"))
+(assert-eql 10.01 (read-from-string "10.01"))
+(assert-eql -10.01 (read-from-string "-10.01"))
+(assert-eql .001 (read-from-string ".001"))
+(assert-eql 1.23e-8 (cl:read-from-string "123.0e-10"))
+(assert-eql 1200000.0 (read-from-string "12e5"))
+(assert-eql 1200000.0 (read-from-string "12s5"))
+(assert-eql 1200000.0 (read-from-string "12D5"))
 
 ;; char case tests
 (assert-true (upper-case-p #\A))
