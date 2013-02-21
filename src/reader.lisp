@@ -654,3 +654,7 @@
   (declare (ignore preserve-whitespace))
   (let ((stream (make-string-input-stream string start end)))
     (read stream eof-error-p eof-value)))
+
+(defmacro with-input-from-string ((var string &key index (start 0) end) &body body)
+  `(let ((,var (make-string-input-stream ,string ,start ,end)))
+     ,@body))
