@@ -7,6 +7,7 @@
   (:import-from :common-lisp
                 #:defpackage #:in-package #:*package* #:find-package #:export
                 #:nil #:t
+                #:quote
                 #:otherwise
                 #:eq #:char-equal #:char= #:string-equal #:string=
                 #:&rest #:&body #:&key #:&optional #:&whole #:&aux
@@ -24,7 +25,7 @@
                 #:+ #:- #:* #:/ #:mod
                 #:zerop
                 #:consp #:numberp #:characterp #:symbolp #:stringp #:arrayp #:vectorp
-                :type-of
+                #:type-of
                 #:aref #:char #:svref
                 #:assert #:error
                 #:setq #:setf
@@ -41,6 +42,7 @@
                 )
   (:export #:defpackage #:in-package #:*package* #:find-package #:export
            #:nil #:t
+           #:quote
            #:eq #:eql #:equal #:equalp #:char-equal #:char= #:string=
            #:not #:null
            #:&rest #:&body #:&key #:&optional #:&whole #:&aux
