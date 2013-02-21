@@ -69,3 +69,5 @@
 /tst/lunula-tests.fasl
 /src/backquote.fasl
 /src/reader-macros.fasl
+/src/reader.fasl
+/src/streams.fasl
