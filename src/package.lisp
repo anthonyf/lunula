@@ -91,7 +91,7 @@
            #:make-array
            #:code-char #:char-code
            #:truncate
-           #:read-char #:peek-char #:write-char
+           #:read-char #:peek-char #:write-char #:unread-char
            #:*standard-input* #:*standard-output*
            #:*read-table* #:*read-base* #:readtable-case
            #:set-macro-character #:get-macro-character
@@ -101,7 +101,7 @@
            #:subseq
            #:some #:every #:notevery #:notany
            #:digit-char #:digit-char-p
-           #:read #:read-from-string
+           #:read #:read-from-string #:with-input-from-string
            #:macroexpand-1
            #:values #:values-list
            #:multiple-value-call #:multiple-value-bind #:multiple-value-list
