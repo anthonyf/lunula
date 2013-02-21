@@ -342,3 +342,10 @@
 (assert-eq 'FOO::BAR (read-from-string "FOO::BAR"))
 (assert-eq 'FOO::|baz| (read-from-string "FOO::|baz|"))
 (assert-eq '|FOOabc| (read-from-string "|FOOabc|"))
+
+;; quote reader
+(assert-equal ''A (read-from-string "'a"))
+
+;; comment reader
+(assert-eql 2 (read-from-string ";test comment 3
+2"))
