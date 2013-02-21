@@ -349,3 +349,7 @@
 ;; comment reader
 (assert-eql 2 (read-from-string ";test comment 3
 2"))
+
+(assert-eq 'test (with-input-from-string (stream "test")
+                   (unread-char (read-char stream) stream)
+                   (read stream)))
