@@ -16,3 +16,27 @@
   (values))
 
 (set-macro-character #\; #'semicolon-reader)
+
+(defun eat-whitespace (stream)
+  (loop
+     (let ((char (peek-char nil stream nil nil)))
+       (cond ((null char)
+              (values))
+             ((whitespacep char)
+              (read-char stream))
+             (t (values))))))
+
+(defun list-reader (stream char)
+  (declare (ignore char))
+  (let ((list nil))
+    (loop
+       (eat-whitespace stream)
+       (let ((char (peek-char nil stream nil nil)))
+         (cond ((null char)
+                (error "EOF read before closing paren"))
+               ((char= #\) char)  (return list))
+               ((char= #\. char)
+                (error "DOT not supported yet"))
+               (t (push (read stream) list)))))))
+
+(set-macro-character #\( #'list-reader)
