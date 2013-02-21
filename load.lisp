@@ -18,6 +18,7 @@
 (load "src/streams.lisp")
 (load "src/readtable.lisp")
 (load "src/reader.lisp")
+(load "src/reader-macros.lisp")
 (load "src/backquote.lisp")
 
 (load "tst/lunula-tests.lisp")
