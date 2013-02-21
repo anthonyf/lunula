@@ -67,3 +67,5 @@
 /src/bootstrap.fasl
 /src/package.fasl
 /tst/lunula-tests.fasl
+/src/backquote.fasl
+/src/reader-macros.fasl
