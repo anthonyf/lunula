@@ -1,20 +1,12 @@
-(cl:in-package :cl-user)
+(in-package :cl-user)
 
 ;;;; It is useful to run these tests against both Lunula and CL to
 ;;;; make sure they produce the same result.  This helps with CL
-;;;; compliance testing.  Call SWITCH-TESTS to change tests to run
-;;;; against CL or LUNULA
+;;;; compliance testing.  
 
-(defun lunula-user::switch-tests (use-cl)
-  (if use-cl
-      (pushnew :lunula-test-use-cl *features*)
-      (setf *features* (remove :lunula-test-use-cl *features*))))
-
-(cl:defpackage
-    #-lunula-test-use-cl :lunula-tests
-    #+lunula-test-use-cl :lunula-tests-cl
-    (:use  #-lunula-test-use-cl :lunula
-           #+lunula-test-use-cl :common-lisp))
+(cl:defpackage :lunula-tests
+    (:use  #+lunula-test :lunula
+           #-lunula-test :common-lisp))
 
 (cl:in-package #-lunula-test-use-cl :lunula-tests
                #+lunula-test-use-cl :lunula-tests-cl)

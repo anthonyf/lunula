@@ -21,4 +21,5 @@
 (load "src/reader-macros.lisp")
 (load "src/backquote.lisp")
 
+(pushnew :lunula-test *features*)
 (load "tst/lunula-tests.lisp")
