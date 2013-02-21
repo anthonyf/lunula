@@ -40,17 +40,17 @@
 (set-macro-character #\`
                      #'(lambda (stream char)
                          (declare (ignore char))
-                         (list 'backquote (cl:read stream t nil t))))
+                         (list 'backquote (read stream t nil t))))
 
 (set-macro-character #\,
                      #'(lambda (stream char)
                          (declare (ignore char))
                          (case (peek-char nil stream t nil t)
                            (#\@ (read-char stream t nil t)
-                                (list *comma-atsign* (cl:read stream t nil t)))
+                                (list *comma-atsign* (read stream t nil t)))
                            (#\. (read-char stream t nil t)
-                                (list *comma-dot* (cl:read stream t nil t)))
-                           (otherwise (list *comma* (cl:read stream t nil t))))))
+                                (list *comma-dot* (read stream t nil t)))
+                           (otherwise (list *comma* (read stream t nil t))))))
 
 
 ;;; If the value of *BQ-SIMPLIFY* is non-NIL, then BACKQUOTE
