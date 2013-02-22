@@ -30,7 +30,7 @@
                 #:assert #:error
                 #:setq #:setf
                 #:loop ;; only simple loop supported for now
-                #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function
+                #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function #:get
                 #:string #:vector
                 #:defvar #:defparameter
                 #:array-dimension
@@ -78,7 +78,7 @@
            #:member
            #:position
            #:complement
-           #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function
+           #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function #:get
            #:string
            #:concatenate
            #:princ-to-string
