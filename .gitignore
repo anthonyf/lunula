@@ -71,3 +71,5 @@
 /src/reader-macros.fasl
 /src/reader.fasl
 /src/streams.fasl
+/src/sequence.fasl
+/src/destructuring-bind.fasl
