@@ -21,10 +21,10 @@
   (loop
      (let ((char (peek-char nil stream nil nil)))
        (cond ((null char)
-              (values))
+              (return (values)))
              ((whitespacep char)
               (read-char stream))
-             (t (values))))))
+             (t (return (values)))))))
 
 (defun list-reader (stream char)
   (declare (ignore char))
