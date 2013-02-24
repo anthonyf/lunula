@@ -30,7 +30,6 @@
               ;; TODO: need to handle doc strings for defun
               (declare (ignore doc-string))
               `(eval-when (:compile-toplevel :load-toplevel :execute)
-
                  (funcall (fdefinition '(setf fdefinition))
                           (lambda ,(car (cdr (cdr form)))
                             ,@(cl:when declare
