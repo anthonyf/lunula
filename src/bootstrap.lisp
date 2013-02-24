@@ -49,13 +49,12 @@
      (setq list (cdr list))))
 
 (defun butlast (list)
-  ((lambda (new-list)
-     (loop
-        (if (not (cadr list))
-            (return (reverse new-list)))
-        (setq new-list (cons (car list) new-list))
-        (setq list (cdr list))))
-   nil))
+  (cl:let ((new-list nil))
+    (loop
+       (if (not (cadr list))
+           (return (reverse new-list)))
+       (setq new-list (cons (car list) new-list))
+       (setq list (cdr list)))))
 
 (defun complement (function)
   (lambda (&rest args)
@@ -65,23 +64,22 @@
 
 (defun member (item list &key (key #'identity) (test #'eql))
   (loop
-     (if (null list)
-         (return nil))
-     (if (funcall test item (funcall key (car list)))
-         (return list))
+     (cl:when (null list)
+       (return nil))
+     (cl:when (funcall test item (funcall key (car list)))
+       (return list))
      (setq list (cdr list))))
 
 (defun 1- (n) (- n 1))
 (defun 1+ (n) (+ n 1))
 
 (defun list-length (list)
-  ((lambda (n)
-     (loop
-        (if (not list)
-            (return n))
-        (setq n (1+ n)
-              list (cdr list))))
-   0))
+  (cl:let ((n 0))
+    (loop
+       (cl:when (not list)
+         (return n))
+       (setq n (1+ n)
+             list (cdr list)))))
 
 (defun length (sequence)
   (if (listp sequence)
@@ -96,41 +94,41 @@
                                  (key #'identity))
   ;; TODO: this is really a dumbed down version of POSITION.  Needs to
   ;; be fleshed out.
-  (if (not (listp sequence))
-      (error "only list sequences are supported"))
-  (if (/= 0 start)
-      (error "start parameter not supported yet"))
-  (if end
-      (error "end parameter not supported yet"))
-  (if from-end
-      (error "from-end parameter not supported yet"))
-  (if test-not
-      (setq test (complement test-not)))
-  ((lambda (n)
-     (loop
-        (if (null sequence)
-            (return nil))
-        (if (funcall test item (funcall key (car sequence)))
-            (return n))
-        (setq n (1+ n))
-        (setq sequence (cdr sequence))))
-   0))
+  (cl:when (not (listp sequence))
+    (error "only list sequences are supported"))
+  (cl:when (/= 0 start)
+    (error "start parameter not supported yet"))
+  (cl:when end
+    (error "end parameter not supported yet"))
+  (cl:when from-end
+    (error "from-end parameter not supported yet"))
+  (cl:when test-not
+    (setq test (complement test-not)))
+  (cl:let ((n 0))
+    (loop
+       (cl:when (null sequence)
+         (return nil))
+       (cl:when (funcall test item (funcall key (car sequence)))
+         (return n))
+       (setq n (1+ n))
+       (setq sequence (cdr sequence)))))
 
 (defun nth (n list)
-  (if (< n 0) (error "cannot get nth position of a negative number"))
+  (cl:when (< n 0)
+    (error "cannot get nth position of a negative number"))
   (loop
-     (if (= n 0)
-         (return (car list)))
+     (cl:when (= n 0)
+       (return (car list)))
      (setq n (1- n))
      (setq list (cdr list))))
 
 (defun (setf nth) (value n list)
-  (if (< n 0) (error "cannot set nth position of a negative number"))
+  (cl:when (< n 0)
+    (error "cannot set nth position of a negative number"))
   (loop
-     (if (= n 0)
-         (progn
-           (rplaca list value)
-           (return value)))
+     (cl:when (= n 0)
+       (rplaca list value)
+       (return value))
      (setq n (1- n))
      (setq list (cdr list))))
 
@@ -149,12 +147,12 @@
           (error "unsupported sequence type"))))
 
 (defun make-list (length &key initial-element)
-  ((lambda (new-list)
-     (loop
-        (if (= 0 length) (return new-list))
-        (setq new-list (cons initial-element new-list))
-        (setq length (1- length))))
-   nil))
+  (cl:let ((new-list nil))
+    (loop
+       (cl:when (= 0 length)
+         (return new-list))
+       (setq new-list (cons initial-element new-list))
+       (setq length (1- length)))))
 
 (defun make-sequence (type length &key initial-element)
   (if (eq type 'list)
@@ -166,111 +164,101 @@
               (error "unsupported sequence type")))))
 
 (defun reverse (sequence)
-  (if (not (listp sequence))
-      (error "non-list sequences not supported yet"))
-  ((lambda (new-list)
-     (loop (if (not sequence)
-               (return new-list))
-        (setq new-list (cons (car sequence) new-list))
-        (setq sequence (cdr sequence))))
-   nil))
+  (cl:when (not (listp sequence))
+    (error "non-list sequences not supported yet"))
+  (cl:let ((new-list nil))
+    (loop (cl:when (not sequence)
+            (return new-list))
+       (setq new-list (cons (car sequence) new-list))
+       (setq sequence (cdr sequence)))))
 
 (defun mapc (function list &rest more-lists)
-  ((lambda (lists)
-     (loop
-        (if ((lambda (lists)
+  (cl:let ((lists (cons list more-lists)))
+    (loop
+       (if (cl:let ((lists lists))
+             (loop
+                (cl:when (not lists)
+                  (return nil))
+                (cl:when (not (car lists))
+                  (return t))
+                (setq lists (cdr lists))))
+           (return))
+       (apply function
+              (cl:let ((lists lists)
+                       (args nil))
+                (loop
+                   (cl:when (not lists)
+                     (return (reverse args)))
+                   (setq args (cons (caar lists)
+                                    args))
+                   (setq lists (cdr lists)))))
+       (setq lists
+             (cl:let ((lists lists)
+                      (new-lists nil))
                (loop
-                  (if (not lists)
-                      (return nil))
-                  (if (not (car lists))
-                      (return t))
-                  (setq lists (cdr lists))))
-             lists)
-            (return))
-        (apply function
-               ((lambda (lists args)
-                  (loop
-                     (if (not lists)
-                         (return (reverse args)))
-                       (setq args (cons (caar lists)
-                                        args))
-                       (setq lists (cdr lists))))
-                lists nil))
-        (setq lists
-              ((lambda (lists new-lists)
-                 (loop
-                    (if (not lists)
-                        (return (reverse new-lists)))
-                    (setq new-lists (cons (cdar lists)
-                                          new-lists))
-                    (setq lists (cdr lists))))
-               lists nil))))
-   (cons list more-lists))
+                  (cl:when (not lists)
+                    (return (reverse new-lists)))
+                  (setq new-lists (cons (cdar lists)
+                                        new-lists))
+                  (setq lists (cdr lists)))))))
   list)
 
 (defun mapcar (function list &rest more-lists)
-  ((lambda (new-list)
-     (apply #'mapc (lambda (&rest args)
-                     (setq new-list (cons (apply function args)
-                                          new-list)))
-            list more-lists)
-     (reverse new-list))
-   nil))
+  (cl:let ((new-list nil))
+    (apply #'mapc (lambda (&rest args)
+                    (setq new-list (cons (apply function args)
+                                         new-list)))
+           list more-lists)
+    (reverse new-list)))
 
 (defun min (number &rest more-numbers)
-  ((lambda (min)
-     (loop
-        (if (null more-numbers)
-            (return min))
-        (if (< (car more-numbers) min)
-            (setq min (car more-numbers)))
-        (setq more-numbers (cdr more-numbers))))
-   number))
+  (cl:let ((min number))
+    (loop
+       (cl:when (null more-numbers)
+         (return min))
+       (cl:when (< (car more-numbers) min)
+         (setq min (car more-numbers)))
+       (setq more-numbers (cdr more-numbers)))))
 
 (defun map-min-length (sequences)
-  ((lambda (sequences length)
-     (loop
-        (if (not sequences)
-            (return length))
-        (if (< (length (car sequences))
-               length)
-            (setq length (length (car sequences))))
-        (setq sequences (cdr sequences))))
-   (cdr sequences)
-   (length (first sequences))))
+  (cl:let ((sequences (cdr sequences))
+           (length (length (first sequences))))
+    (loop
+       (cl:when (not sequences)
+         (return length))
+       (cl:when (< (length (car sequences))
+                   length)
+         (setq length (length (car sequences))))
+       (setq sequences (cdr sequences)))))
 
 (defun map-get-args (sequences index)
-  ((lambda (args)
-     (loop
-        (if (not sequences)
-            (return (reverse args)))
-        (setq args (cons (elt (car sequences) index)
-                         args))
-        (setq sequences (cdr sequences))))
-   nil))
+  (cl:let ((args nil))
+    (loop
+       (cl:when (not sequences)
+         (return (reverse args)))
+       (setq args (cons (elt (car sequences) index)
+                        args))
+       (setq sequences (cdr sequences)))))
 
 (defun map (result-type function first-sequence &rest more-sequences)
   ;; TODO: MAP will be slow when sequences or result sequence are
   ;; lists due to the use of ELT.
-  ((lambda (sequences length)
-     ((lambda (new-sequence index)
-        (loop
-           (if (= index length)
-               (return))
-           ((lambda (value)
-              (if new-sequence
-                  (setf (elt new-sequence index) value)))
-            (apply function
-                   (map-get-args sequences index)))
-           (setq index (1+ index)))
-        new-sequence)
-      (if result-type
-          (make-sequence result-type length))
-      0))
-   (cons first-sequence
-         more-sequences)
-   (map-min-length (cons first-sequence
-                         more-sequences))))
+  (cl:let* ((sequences (cons first-sequence
+                             more-sequences))
+            (length (map-min-length (cons first-sequence
+                                          more-sequences)))
+            (new-sequence (cl:when result-type
+                            (make-sequence result-type length)))
+            (index 0))
+    (loop
+       (cl:when (= index length)
+         (return))
+       (cl:let ((value (apply function
+                              (map-get-args sequences index))))
+         (cl:when new-sequence
+           (setf (elt new-sequence index) value)))
+       (setq index (1+ index)))
+    new-sequence))
 
 (defun reduce (function sequence &key (key #'identity) (initial-value 0))
   (map nil #'(lambda (item)
@@ -279,18 +267,17 @@
   initial-value)
 
 (defun concatenate (output-type-spec &rest sequences)
-  ((lambda (total-length new-sequence index)
-     (setq new-sequence (make-sequence output-type-spec total-length))
-     (mapc #'(lambda (sequence)
-               (map nil #'(lambda (element)
-                            (setf (elt new-sequence index) element)
-                            (setq index (1+ index)))
-                    sequence))
-           sequences)
-     new-sequence)
-   (reduce #'+ (mapcar #'length sequences))
-   nil
-   0))
+  (cl:let ((total-length (reduce #'+ (mapcar #'length sequences)))
+           (new-sequence nil)
+           (index 0))
+    (setq new-sequence (make-sequence output-type-spec total-length))
+    (mapc #'(lambda (sequence)
+              (map nil #'(lambda (element)
+                           (setf (elt new-sequence index) element)
+                           (setq index (1+ index)))
+                   sequence))
+          sequences)
+    new-sequence))
 
 (defun append (&rest lists)
   ;; TODO: this is a very lazy and inefficient implementation of
@@ -300,14 +287,13 @@
 (defun vector-equal (a b)
   (and (= (length a)
           (length b))
-       ((lambda (length index)
-          (loop (if (= index length)
-                    (return t))
-             (if (/= (aref a index) (aref b index))
-                 (return nil))
-             (setq index (1+ index))))
-        (length a)
-        0)))
+       (cl:let ((length (length a))
+                (index 0))
+         (loop (cl:when (= index length)
+                 (return t))
+            (cl:when (/= (aref a index) (aref b index))
+              (return nil))
+            (setq index (1+ index))))))
 
 (defun equal (a b)
   (or (and (consp a)
@@ -345,20 +331,18 @@
   (map 'string
        #'(lambda (char-code)
            (nth char-code '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)))
-       ((lambda (digits)
-          (loop
-             (setq digits (cons (mod integer 10)
-                                digits))
-             (setq integer (truncate (/ integer 10)))
-             (if (<= integer 0)
-                 (return)))
-          digits)
-        nil)))
+       (cl:let ((digits nil))
+         (loop
+            (setq digits (cons (mod integer 10)
+                               digits))
+            (setq integer (truncate (/ integer 10)))
+            (cl:when (<= integer 0)
+              (return)))
+         digits)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *gensym* 0)
   (defun gensym (&optional (prefix "G"))
-    ((lambda (sym)
-       (setq *gensym* (1+ *gensym*))
-       sym)
-     (make-symbol (concatenate 'string prefix (integer-to-string *gensym*))))))
+    (cl:let ((sym (make-symbol (concatenate 'string prefix (integer-to-string *gensym*)))))
+      (setq *gensym* (1+ *gensym*))
+      sym)))

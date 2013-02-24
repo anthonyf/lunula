@@ -1,12 +1,10 @@
 (in-package :lunula)
 
 (defmacro prog1 (result &body body)
-  ((lambda (gresult)
-     `((lambda (,gresult)
-         ,@body
-         ,gresult)
-       ,result))
-   (gensym)))
+  (cl:let ((gresult (gensym)))
+    `(let ((,gresult ,result))
+       ,@body
+       ,gresult)))
 
 (defmacro push (obj place)
   `(setf ,place (cons ,obj ,place)))
