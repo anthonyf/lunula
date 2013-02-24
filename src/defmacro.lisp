@@ -7,8 +7,8 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun expand-macro (args-name lambda-list body)
     (if (null lambda-list)
-        `(progn (if ,args-name
-                    (error "to many arguments passed to macro"))
+        `(progn (cl:when ,args-name
+                  (error "to many arguments passed to macro"))
                 ,@body)
         ;; if the first item in the lambda list is a list, then we
         ;; treat it as its own lambda list and let lambda handle it
@@ -20,13 +20,12 @@
             ;; &body just treat the rest of the lambda list as usual
             (if (member (first lambda-list) '(&rest &optional &key &body))
                 ;; lambda doesnt know what &body is, so convert it to &rest
-                ((lambda (body-pos)
-                   (if body-pos
-                       (setf (nth body-pos lambda-list) '&rest))
-                   `(apply (lambda (,@lambda-list)
-                             ,@body)
-                           ,args-name))
-                 (position '&body lambda-list))
+                (cl:let ((body-pos (position '&body lambda-list)))
+                  (cl:when body-pos
+                    (setf (nth body-pos lambda-list) '&rest))
+                  `(apply (lambda (,@lambda-list)
+                            ,@body)
+                          ,args-name))
                 `(apply (lambda (,args-name ,(first lambda-list))
                           ,(expand-macro args-name (rest lambda-list) body))
                         (rest ,args-name) (first ,args-name) nil)))))
@@ -34,20 +33,18 @@
   (setf (macro-function 'defmacro)
         (lambda (whole env)
           (declare (ignore env))
-          ((lambda (macro-name lambda-list body args)
-             `(eval-when (:compile-toplevel :load-toplevel :execute)
-                (setf (macro-function ',macro-name)
-                      (lambda (whole env)
-                        (declare (ignore env))
-                        ((lambda (,args)
-                           ,(expand-macro args
-                                          lambda-list
-                                          body))
-                         (rest whole))))))
-           (cadr whole)
-           (caddr whole)
-           (cdddr whole)
-           (gensym "ARGS")))))
+          (cl:let ((macro-name (cadr whole))
+                   (lambda-list (caddr whole))
+                   (body (cdddr whole))
+                   (args (gensym "ARGS")))
+            `(eval-when (:compile-toplevel :load-toplevel :execute)
+               (setf (macro-function ',macro-name)
+                     (lambda (whole env)
+                       (declare (ignore env))
+                       (cl:let ((,args (rest whole)))
+                         ,(expand-macro args
+                                        lambda-list
+                                        body)))))))))
 
 (defun macroexpand-1 (form &optional env)
   (if (macro-function (car form))
