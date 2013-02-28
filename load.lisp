@@ -14,6 +14,7 @@
 (load "src/sequence.lisp")
 (load "src/math.lisp")
 (load "src/defstruct.lisp")
+;;(load "src/mini-clos.lisp")
 (load "src/error.lisp")
 (load "src/streams.lisp")
 (load "src/readtable.lisp")
