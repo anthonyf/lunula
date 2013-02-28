@@ -20,6 +20,7 @@
 (load "src/reader.lisp")
 (load "src/reader-macros.lisp")
 (load "src/backquote.lisp")
+(load "src/printer.lisp")
 (load "src/lexical-environment.lisp")
 (load "src/compiler.lisp")
 
