@@ -114,6 +114,8 @@
            #:destructuring-bind
            #:defstruct
            #:alpha-char-p
+           #:push #:pushnew #:pop
+           #:incf #:decf
            #:defvar #:defparameter
            ))
 
