@@ -5,7 +5,7 @@
   ;; COMMON-LISP so we can easlily identify it later and implement it
   ;; in the compiler.
   (:import-from :common-lisp
-                #:defpackage #:in-package #:*package* #:find-package #:export
+                #:defpackage #:in-package #:*package* #:find-package #:export #:package-name
                 #:nil #:t
                 #:quote
                 #:otherwise
@@ -30,12 +30,13 @@
                 #:assert #:error
                 #:setq #:setf
                 #:loop ;; only simple loop supported for now
-                #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function #:get
+                #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function #:symbol-package #:get #:boundp
                 #:string #:vector
                 #:defvar #:defparameter
                 #:array-dimension
                 #:make-string
                 #:make-array
+                #:code-char #:char-code
                 #:truncate
                 #:values
                 #:multiple-value-call
@@ -78,7 +79,7 @@
            #:member
            #:position
            #:complement
-           #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function #:get
+           #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function #:symbol-package #:get #:boundp
            #:string
            #:concatenate
            #:princ-to-string
@@ -111,7 +112,9 @@
            #:plusp #:minusp
            #:upper-case-p #:lower-case-p #:both-case-p
            #:destructuring-bind
-           #:defstruct))
+           #:defstruct
+           #:defvar #:defparameter
+           ))
 
 (defpackage :lunula-user
   (:use :lunula))
