@@ -1,0 +1,36 @@
+* Intermedate Language
+** toplevel forms
+<function> | <intern> ?
+** statement
+<assign> | <if> | <progn> | <progv> | <loop>
+** expression
+lambda | add | subtract | multiply | divide
+** assign
+(assign <l-value> <expression>)
+** l-value (can be set by ASSIGN statement)
+<value> | <local> | <global> | <param>
+** value
+(value <index>)
+** local
+(local <name>)
+** global
+(global <symbol>)
+** param
+(param x) -- parameter register, holds values passed to functions
+** loop
+** if
+(if <expression> <statement> [statement])
+** progn
+(progn [statement]+)
+** prov
+(progv (<name>+) (<value>+) <statement>+)
+** lambda
+(lambda <statement>+)
+** add, subtract, multiply, divide
+(add <number>+)
+(subtract <number>+)
+(multiply <number>+)
+(divide <number>+)
+** function
+(function <name> <locals> <statement>+)
+ 

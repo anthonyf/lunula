@@ -1,24 +1,15 @@
-(cl:in-package :cl-user)
+(in-package :cl-user)
 
 ;;;; It is useful to run these tests against both Lunula and CL to
 ;;;; make sure they produce the same result.  This helps with CL
-;;;; compliance testing.  Call SWITCH-TESTS to change tests to run
-;;;; against CL or LUNULA
+;;;; compliance testing.  
 
-(defun lunula-user::switch-tests (use-cl)
-  (if use-cl
-      (pushnew :lunula-test-use-cl *features*)
-      (setf *features* (remove :lunula-test-use-cl *features*))))
-
-(cl:defpackage
-    #-lunula-test-use-cl :lunula-tests
-    #+lunula-test-use-cl :lunula-tests-cl
-    (:use  #-lunula-test-use-cl :lunula
-           #+lunula-test-use-cl :common-lisp))
+(cl:defpackage :lunula-tests
+    (:use  #+lunula-test :lunula
+           #-lunula-test :common-lisp))
 
 (cl:in-package #-lunula-test-use-cl :lunula-tests
                #+lunula-test-use-cl :lunula-tests-cl)
-
 
 (defmacro assert-eq (a b)
   `(assert (eq ,a ,b)))
@@ -195,11 +186,17 @@
                        ((1 2 3) 'blah)
                        (10 'hello)
                        (otherwise 'there)))
+
 (assert-equal 'there (case 10
                        ((1 2 3) 'blah)
                        (11 'hello)
                        (otherwise 'there)))
 
+(assert-eq 2 (let ((type 'list))
+               (case type
+                 (vector 1)
+                 (list 2)
+                 (otherwise 3))))
 ;;;; DO ;;;;
 (assert-equal 4 (do ((temp-one 1 (1+ temp-one))
                      (temp-two 0 (1- temp-two)))
@@ -216,8 +213,8 @@
 ;;;; NRECONC ;;;;
 
 (assert-equal '(3 2 1 A B C)
-              (let ((list-1 '(1 2 3))
-                    (list-2 '(a b c)))
+              (let ((list-1 (list 1 2 3))
+                    (list-2 (list 'a 'b 'c)))
                 (nreconc list-1 list-2)))
 
 ;;;; EVERY, SOME, NOTEVERY, NOTANY ;;;;
@@ -225,20 +222,6 @@
 (assert-true (some #'= '(1 2 3 4 5) '(5 4 3 2 1)))
 (assert-false (notevery #'< '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)))
 (assert-true (notany #'> '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)))
-
-;;;; READER ;;;;
-
-(assert-eq 101 (read-from-string "101"))
-(assert-eq 101 (read-from-string "101."))
-
-(assert-eq 201 (let ((*read-base* 16)) 
-                 (read-from-string "201.")))
-
-(assert-eq 513 (let ((*read-base* 16)) 
-                 (read-from-string "201")))
-
-;; TODO
-;;(assert-eq 1.0 (read-from-string "1.0"))
 
 ;;;; FLET ;;;;
 (assert-eq 30 (flet ((foo (a b)
@@ -259,5 +242,114 @@
                                      (fib (- n 2)))))))
                 (fib 10)))
 
+;;;; MULTIPLE-VALUE-BIND ;;;;
 
+(assert-equal '(1 2 3)
+              (multiple-value-bind (a b c)
+                  (values 1 2 3)
+                (list a b c)))
 
+(assert-false (multiple-value-bind ()
+                  (values-list (list 1 2 3))
+                nil))
+
+;;;; ASSOC ;;;;
+(let ((values '((x . 100) (y . 200) (z . 50))))
+  (assert-equal '(y . 200) (assoc 'y values))
+  (assert-eq nil (assoc 'a values))
+  (assert-equal '(x . 100) (assoc 'x values))
+  (assert-equal '(z . 50) (assoc 'z values)))
+
+(let ((alist '((1 . "one")(2 . "two")(3 . "three"))))
+  (assert-equal '(2 . "two") (assoc 2 alist))
+  (setq alist '(("one" . 1)("two" . 2)))
+  (assert-equalp '("one" . 1) (assoc "one" alist :test #'equalp))
+  (assert-equalp '("two" . 2) (assoc #\o alist :key #'(lambda(x)(char x 2)))))
+
+;;;; DESTRUCTURING-BIND ;;;;
+
+(assert-eq 6 (destructuring-bind (a b c) 
+                 (list 1 2 3)
+               (+ a b c)))
+(assert-eq 150 (destructuring-bind (a &optional (b 20) &key (c 30) (d 40) (e 50))
+                   (list 10)
+                 (+ a b c d e)))
+
+;;;; DEFSTRUCT ;;;;
+
+(defstruct (foo (:type list)) a b c)
+(let ((foo (make-foo :a 10 :b 20 :c 30)))
+  (assert-eq 10 (foo-a foo))
+  (assert-eq 20 (foo-b foo))
+  (assert-eq 30 (foo-c foo)))
+
+(defstruct (foo2 (:type vector)) a b c)
+(let ((foo (make-foo2 :a 10 :b 20 :c 30)))
+  (assert-eq 10 (foo2-a foo))
+  (assert-eq 20 (foo2-b foo))
+  (assert-eq 30 (foo2-c foo)))
+
+(defstruct (foo3 (:type vector)) (a 10) (b 20) (c 30))
+(let ((foo (make-foo3 :a 5)))
+  (assert-eq 5 (foo3-a foo))
+  (assert-eq 20 (foo3-b foo))
+  (assert-eq 30 (foo3-c foo)))
+
+;;;; READER ;;;;
+
+;; integer tests
+(assert-eq 101 (read-from-string "101"))
+(assert-eq 101 (read-from-string "101."))
+
+(assert-eq 201 (let ((*read-base* 16)) 
+                 (read-from-string "201.")))
+
+(assert-eq 513 (let ((*read-base* 16)) 
+                 (read-from-string "201")))
+
+(assert-eq 2561 (let ((*read-base* 16)) 
+                  (read-from-string "A01")))
+
+;; float tests
+;; NOTE: these could fail due to precision errors.  Should probably
+;; just comment these out.
+(assert-eql 1.0 (read-from-string "1.0"))
+(assert-eql -.0 (read-from-string "-.0"))
+(assert-eql -.1 (read-from-string "-.1"))
+(assert-eql 10.0 (read-from-string "10.0"))
+(assert-eql 10.01 (read-from-string "10.01"))
+(assert-eql -10.01 (read-from-string "-10.01"))
+(assert-eql .001 (read-from-string ".001"))
+(assert-eql 1.23e-8 (read-from-string "123.0e-10"))
+(assert-eql 1200000.0 (read-from-string "12e5"))
+;;(assert-eql 1200000.0 (read-from-string "12s5"))
+;;(assert-eql 1200000.0 (read-from-string "12D5"))
+
+;; char case tests
+(assert-true (upper-case-p #\A))
+(assert-false (upper-case-p #\a))
+(assert-true (both-case-p #\a))
+(assert-false (both-case-p #\5))
+(assert-false (lower-case-p #\5))
+(assert-false (upper-case-p #\5))
+
+;; symbol tests
+(assert-eq :blah (read-from-string ":BLAH"))
+(assert-eq :BLAH (read-from-string ":blah"))
+(assert-eq :|blah| (read-from-string ":|blah|"))
+(assert-eq 'a|baz|a (read-from-string "a|baz|a"))
+(defpackage "FOO")
+(assert-eq 'FOO::BAR (read-from-string "FOO::BAR"))
+(assert-eq 'FOO::|baz| (read-from-string "FOO::|baz|"))
+(assert-eq '|FOOabc| (read-from-string "|FOOabc|"))
+
+;; quote reader
+(assert-equal ''A (read-from-string "'a"))
+
+;; comment reader
+(assert-eql 2 (read-from-string ";test comment 3
+2"))
+
+(assert-eq 'test (with-input-from-string (stream "test")
+                   (unread-char (read-char stream) stream)
+                   (read stream)))
