@@ -23,6 +23,8 @@
 (load "src/backquote.lisp")
 (load "src/printer.lisp")
 (load "src/lexical-environment.lisp")
+(load "src/global-environment.lisp")
+(load "src/compiler-emitter.lisp")
 (load "src/compiler.lisp")
 
 (pushnew :lunula-test *features*)
