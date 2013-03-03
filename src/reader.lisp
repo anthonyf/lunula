@@ -206,6 +206,11 @@
         (downcase (char-downcase char)))
     (not (char= upcase downcase))))
 
+(defun alpha-char-p (char)
+  (when (or (upper-case-p char)
+            (lower-case-p char))
+    t))
+
 (defun maybe-change-case (char)
   (case (readtable-case *read-table*)
     (:upcase (char-upcase char))

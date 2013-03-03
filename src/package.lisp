@@ -113,6 +113,7 @@
            #:upper-case-p #:lower-case-p #:both-case-p
            #:destructuring-bind
            #:defstruct
+           #:alpha-char-p
            #:defvar #:defparameter
            ))
 
