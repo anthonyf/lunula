@@ -13,10 +13,10 @@
   (cl:let ((obj-name (gensym)))
     `(let ((,obj-name ,obj))
        (unless (member ,obj-name ,place
-                       ,@(when key
-                               `(:key ,key))
-                       ,@(when test
-                               `(:test ,test)))
+                       ,@(cl:when key
+                                  `(:key ,key))
+                       ,@(cl:when test
+                                  `(:test ,test)))
          (push ,obj-name ,place))
        ,place)))
 
