@@ -65,12 +65,12 @@
 
 (defun global-lookup-value (symbol)
   (unless (boundp symbol)
-    (warn "Symbol ~A is not bound" symbol))
-  (concat (global-lookup symbol)
+    (cl:warn "Symbol ~A is not bound" symbol))
+  (emit-concat (global-lookup symbol)
           ".value"))
 
 (defun global-lookup-function (symbol)
   (unless (fboundp symbol)
-    (warn "Symbol ~A is not bound to a function" symbol))
-  (concat (global-lookup symbol)
+    (cl:warn "Symbol ~A is not bound to a function" symbol))
+  (emit-concat (global-lookup symbol)
           ".function"))

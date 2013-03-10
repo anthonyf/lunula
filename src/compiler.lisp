@@ -26,9 +26,9 @@
                               *compiler-dispatch* :key 'first)))
     (if dispatch
         (funcall (funcall (cond ((eq type 'statement)
-                                 'compile-statement-function)
+                                 'compiler-dispatch-entry-compile-statement-function)
                                 ((eq type 'expression)
-                                 'compile-expression-function)
+                                 'compiler-dispatch-entry-compile-expression-function)
                                 (t (error "invalid compiler dispatch type")))
                           dispatch)
                  form env)
@@ -52,9 +52,10 @@
     (with-indent            
         (let ((compiled-forms
                (cl:with-output-to-string (*compiler-out*)
-                 (do ((form (read input-stream nil nil) (cl:read input-stream nil nil)))
+                 (cl:do ((form (cl:read input-stream nil nil)
+                            (cl:read input-stream nil nil)))
                      ((null form))          
-                   ;;(format *error-output* "Compiling form:~%~A~%~%" form)
+                   (cl:format cl:*error-output* "Compiling form:~%~A~%~%" form)
                    ;; TODO (emit-commented form)
                    (compile-statement form env)))))
           (emit-comment-line "intern all symbols")
@@ -65,6 +66,6 @@
     (emit-line "})();")))
 
 (defun compile-string (str)
-  (with-input-from-string (in str)
+  (cl:with-input-from-string (in str)
     (cl:with-output-to-string (out)
       (compile-stream in out))))
