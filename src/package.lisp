@@ -5,118 +5,280 @@
   ;; COMMON-LISP so we can easlily identify it later and implement it
   ;; in the compiler.
   (:import-from :common-lisp
-                #:defpackage #:in-package #:*package* #:find-package #:export #:package-name
-                #:nil #:t
-                #:quote
-                #:otherwise
-                #:eq #:char-equal #:char= #:string-equal #:string=
-                #:&rest #:&body #:&key #:&optional #:&whole #:&aux
-                #:eval-when #:progn #:if
-                #:lambda #:declare #:ignore #:inline
-                #:fdefinition #:macro-function
-                #:block #:return
-                #:macrolet
-                #:throw #:catch
-                #:apply #:funcall
-                #:and #:or
-                #:cons #:car #:cdr
-                #:rplaca #:rplacd
-                #:= #:< #:> #:<= #:>= #:/=
-                #:+ #:- #:* #:/ #:mod
-                #:zerop
-                #:consp #:numberp #:characterp #:symbolp #:stringp #:arrayp #:vectorp
-                #:type-of
-                #:aref #:char #:svref
-                #:assert #:error
-                #:setq #:setf
-                #:loop ;; only simple loop supported for now
-                #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function #:symbol-package #:get #:boundp
-                #:string #:vector
-                #:defvar #:defparameter
+                #:&aux
+                #:&body
+                #:&key
+                #:&optional
+                #:&rest
+                #:&whole
+                #:*
+                #:*package*
+                #:+
+                #:-
+                #:/
+                #:/=
+                #:<
+                #:<=
+                #:=
+                #:>
+                #:>=
+                #:and
+                #:apply
+                #:aref
                 #:array-dimension
-                #:make-string
+                #:arrayp
+                #:assert
+                #:block
+                #:boundp
+                #:car
+                #:catch
+                #:cdr
+                #:char
+                #:char-code
+                #:char-equal
+                #:char=
+                #:characterp
+                #:code-char
+                #:cons
+                #:consp
+                #:declare
+                #:defpackage
+                #:defparameter
+                #:defvar
+                #:eq
+                #:error
+                #:eval-when
+                #:export
+                #:fboundp
+                #:fdefinition
+                #:find-package
+                #:funcall
+                #:get
+                #:if
+                #:ignore
+                #:in-package
+                #:inline
+                #:intern
+                #:lambda
+                #:loop ;; only simple loop supported for now
+                #:macro-function
+                #:macrolet
                 #:make-array
-                #:code-char #:char-code
-                #:truncate
-                #:values
+                #:make-string
+                #:make-symbol
+                #:mod
                 #:multiple-value-call
+                #:nil
+                #:numberp
+                #:or
+                #:otherwise
+                #:package-name
+                #:progn
+                #:quote
+                #:return
+                #:rplaca
+                #:rplacd
+                #:setf
+                #:setq
+                #:string
+                #:string-equal
+                #:string=
+                #:stringp
+                #:svref
+                #:symbol-function
+                #:symbol-name
+                #:symbol-package
+                #:symbol-value
+                #:symbolp
+                #:t
+                #:throw
+                #:truncate
+                #:type-of
+                #:values
+                #:vector
+                #:vectorp
+                #:zerop
                 )
-  (:export #:defpackage #:in-package #:*package* #:find-package #:export
-           #:nil #:t
-           #:quote
-           #:eq #:eql #:equal #:equalp #:char-equal #:char= #:string=
-           #:not #:null
-           #:&rest #:&body #:&key #:&optional #:&whole #:&aux
-           #:eval-when
-           #:progn #:prog1
-           #:if #:cond #:when #:unless #:case #:otherwise
-           #:lambda #:declare #:ignore
-           #:flet #:labels
-           #:fdefinition #:macro-function
-           #:block #:return
-           #:throw #:catch
-           #:apply #:funcall
-           #:and #:or
-           #:cons #:car #:cdr
-           #:atom #:listp
-           #:rplaca #:rplacd
-           #:list #:vector
-           #:list*
-           #:= #:< #:> #:<= #:>= #:/=
-           #:+ #:- #:* #:/
-           #:1+ #:1-
-           #:zerop
-           #:consp #:numberp #:characterp #:symbolp #:stringp #:arrayp #:vectorp
-           #:type-of
-           #:aref #:char #:svref
-           #:assert #:error
-           #:defun #:defmacro
-           #:nth #:elt
-           #:let #:let*
-           #:setq #:setf #:psetq
-           #:loop #:do #:do*
-           #:length
-           #:member
-           #:position
-           #:complement
-           #:make-symbol #:intern #:symbol-value #:symbol-name #:symbol-function #:symbol-package #:get #:boundp
-           #:string
-           #:concatenate
-           #:princ-to-string
-           #:defvar
-           #:reverse #:nreverse
-           #:map #:mapcar #:mapc
-           #:reduce
-           #:array-dimension
-           #:make-string
-           #:make-array
-           #:code-char #:char-code
-           #:truncate
-           #:read-char #:peek-char #:write-char #:unread-char
-           #:*standard-input* #:*standard-output*
-           #:*read-table* #:*read-base* #:readtable-case
-           #:set-macro-character #:get-macro-character
-           #:first #:rest #:second #:third #:last #:butlast
-           #:append #:nconc #:nreconc
-           #:copy-list
-           #:subseq
-           #:some #:every #:notevery #:notany
-           #:digit-char #:digit-char-p
-           #:read #:read-from-string #:with-input-from-string
-           #:macroexpand-1
-           #:values #:values-list
-           #:multiple-value-call #:multiple-value-bind #:multiple-value-list
-           #:assoc
-           #:char-upcase #:char-downcase
-           #:abs #:expt
-           #:plusp #:minusp
-           #:upper-case-p #:lower-case-p #:both-case-p
-           #:destructuring-bind
-           #:defstruct
+  (:export #:&aux
+           #:&body
+           #:&key
+           #:&optional
+           #:&rest
+           #:&whole
+           #:*
+           #:*package*
+           #:*read-base*
+           #:*read-table*
+           #:*standard-input*
+           #:*standard-output*
+           #:+
+           #:-
+           #:/
+           #:/=
+           #:1+
+           #:1-
+           #:<
+           #:<=
+           #:=
+           #:>
+           #:>=
+           #:abs
            #:alpha-char-p
-           #:push #:pushnew #:pop
-           #:incf #:decf
-           #:defvar #:defparameter
+           #:and
+           #:append
+           #:apply
+           #:aref
+           #:array-dimension
+           #:arrayp
+           #:assert
+           #:assoc
+           #:atom
+           #:block
+           #:both-case-p
+           #:boundp
+           #:butlast
+           #:car
+           #:case
+           #:catch
+           #:cdr
+           #:char
+           #:char-code
+           #:char-downcase
+           #:char-equal
+           #:char-upcase
+           #:char=
+           #:characterp
+           #:code-char
+           #:complement
+           #:concatenate
+           #:cond
+           #:cons
+           #:consp
+           #:copy-list
+           #:decf
+           #:declare
+           #:defmacro
+           #:defpackage
+           #:defparameter
+           #:defstruct
+           #:defun
+           #:defvar
+           #:defvar
+           #:destructuring-bind
+           #:digit-char
+           #:digit-char-p
+           #:do
+           #:do*
+           #:elt
+           #:eq
+           #:eql
+           #:equal
+           #:equalp
+           #:error
+           #:eval-when
+           #:every
+           #:export
+           #:expt
+           #:fdefinition
+           #:find-package
+           #:first
+           #:flet
+           #:funcall
+           #:get
+           #:get-macro-character
+           #:if
+           #:ignore
+           #:in-package
+           #:incf
+           #:intern
+           #:labels
+           #:lambda
+           #:last
+           #:length
+           #:let
+           #:let*
+           #:list
+           #:list*
+           #:listp
+           #:loop
+           #:lower-case-p
+           #:macro-function
+           #:macroexpand-1
+           #:make-array
+           #:make-string
+           #:make-symbol
+           #:map
+           #:mapc
+           #:mapcar
+           #:member
+           #:minusp
+           #:multiple-value-bind
+           #:multiple-value-call
+           #:multiple-value-list
+           #:nconc
+           #:nil
+           #:not
+           #:notany
+           #:notevery
+           #:nreconc
+           #:nreverse
+           #:nth
+           #:null
+           #:numberp
+           #:or
+           #:otherwise
+           #:peek-char
+           #:plusp
+           #:pop
+           #:position
+           #:princ-to-string
+           #:prog1
+           #:progn
+           #:psetq
+           #:push
+           #:pushnew
+           #:quote
+           #:read
+           #:read-char
+           #:read-from-string
+           #:readtable-case
+           #:reduce
+           #:rest
+           #:return
+           #:reverse
+           #:rplaca
+           #:rplacd
+           #:second
+           #:set-macro-character
+           #:setf
+           #:setq
+           #:some
+           #:string
+           #:string=
+           #:stringp
+           #:subseq
+           #:svref
+           #:symbol-function
+           #:symbol-name
+           #:symbol-package
+           #:symbol-value
+           #:symbolp
+           #:t
+           #:third
+           #:throw
+           #:truncate
+           #:type-of
+           #:unless
+           #:unread-char
+           #:upper-case-p
+           #:values
+           #:values-list
+           #:vector
+           #:vectorp
+           #:when
+           #:with-input-from-string
+           #:write-char
+           #:zerop
            ))
 
 (defpackage :lunula-user
