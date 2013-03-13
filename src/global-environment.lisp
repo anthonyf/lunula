@@ -57,7 +57,7 @@
                             "\"];")))))
 
 (defun global-lookup (symbol)
-  (let ((var-name (find-unique-emitted-name *toplevel-interns* symbol)))
+  (let ((var-name (make-unique-emitted-name *toplevel-interns* symbol)))
     (pushnew (make-global-env :symbol symbol :emitted-name var-name)
              *toplevel-interns*
              :test 'equal)
