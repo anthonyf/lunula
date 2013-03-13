@@ -72,4 +72,4 @@
   (funcall string-output-stream :get-output-stream-string))
 
 (defvar *standard-input* nil)
-(defvar *standard-output* (make-string-output-stream))
+(defvar *standard-output* (cl:make-string-output-stream))
