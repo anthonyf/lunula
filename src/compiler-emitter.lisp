@@ -7,7 +7,7 @@
 (defun emit-indent ()
   (dotimes (n (* *indent-spaces*
                  *indent-level*))
-    (cl:princ "    " *compiler-out*)))
+    (cl:princ #\space *compiler-out*)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defmacro with-indent (&body body)
