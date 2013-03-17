@@ -35,9 +35,43 @@
   (declare (ignore env))
   (emit-concat "\"" form "\""))
 
-;; COMPILE LAMBDA
-(defparameter *declared-vars* nil)
+;; JS-LINES
 
+(defun js-lines-p (form)
+  (and (listp form)
+       (eq 'js-lines (first form))))
+
+(defun compile-js-lines-statement (form env)
+  (declare (ignore env))
+  (let ((lines (rest form)))
+    (with-indent
+      (dolist (line lines)
+        (emit-indented-line line)))))
+
+;; JS-INLINE
+
+(defun js-inline-p (form)
+  (and (listp form)
+       (eq 'js-inline (first form))))
+
+(defun compile-js-inline-expression (form env)
+  (let ((inputs (second form))
+        (lines (cddr form))
+        (n 1))
+    (emit-indented-line (value) " = " (compile-expression 'nil env) ";")
+    (dolist (input inputs)
+      (emit-indented-line (param) " = " (compile-expression input env) ";")
+      (incf n))
+    (dolist (line lines)
+      (emit-indented-line line)))
+  (value))
+
+(defun compile-js-inline-statement (form env)
+  (declare (ignore form env))
+  (error "not yet implemented"))
+
+
+;; COMPILE LAMBDA
 (defun lambda-p (form)
   (and (listp form)
        (eq 'lambda (first form))))
@@ -47,9 +81,14 @@
            :test 'string=) 
   "$v")
 
+(defparameter *declared-vars* nil
+  "This variable holds the javascript vars that need to be declared at
+  each function scope level.")
+
 (defun emit-var-declarations ()
+  "Emit javascript function level vars."
   (when *declared-vars*
-    (let ((*declared-vars* (copy-list (cl:sort *declared-vars* 'string<))))
+    (let ((*declared-vars* (copy-list (cl:sort *declared-vars* #'cl:string<))))
       (emit-indented "var " (first *declared-vars*))
       (dolist (var (rest *declared-vars*))
         (emit ", " var))
@@ -75,60 +114,60 @@
                                    (do* ((lambda-list lambda-list (rest lambda-list))
                                          (param (car lambda-list) (car lambda-list)))
                                         ((or (not lambda-list)
-                                             (member param '(lunula::&optional lunula::&rest lunula::&key lunula::&aux
+                                             (member param '(&optional &rest &key &aux
                                                              cl::&optional cl::&rest cl::&key cl::&aux)))
                                          lambda-list)
                                      (setf env (env-extend env param))
-                                     (let ((var-name (lisp-to-js-name param)))
+                                     (let ((var-name (env-emitted-name (env-lookup env param))))
                                        (pushnew var-name *declared-vars*
                                                 :test 'string=)
                                        (emit-indented-line var-name " = arguments[" n "];"))
                                      (incf n))))
                               (setf arity n)
                               ;; handle optional parameters
-                              (when (member (car lambda-list) '(lunula::&optional cl::&optional))
+                              (when (member (car lambda-list) '(&optional cl::&optional))
                                 (setf arity-op '>=)
                                 (do* ((lambda-list (rest lambda-list) (rest lambda-list))
                                       (param (car lambda-list)
                                              (car lambda-list)))
                                      ((or (not lambda-list)
-                                          (member param '(lunula::&rest lunula::&key lunula::&aux
+                                          (member param '(&rest &key &aux
                                                           cl::&rest cl::&key cl::&aux)))
                                       lambda-list)
                                   (let* ((param (if (listp param) (car param) param))
                                          (default (if (listp param) (cadr param) nil))
-                                         (var-name (lisp-to-js-name param)))
+                                         (var-name (env-emitted-name (env-lookup env param))))
                                     (setf env (env-extend env param))
                                     (pushnew var-name *declared-vars*
                                              :test 'string=)
                                     (emit-indented-line var-name " = arguments.length > " n " ? arguments[" n "] : " (compile-expression default env) ";"))
                                   (incf n)))
-                              (when (member (car lambda-list) '(lunula::&rest
+                              (when (member (car lambda-list) '(&rest
                                                                 cl::&rest))
                                 (setf arity-op '>=)
                                 ;; a rest for sucks up all of the remaining arguments into a
                                 ;; list
                                 (assert (consp (cdr lambda-list)))
                                 (let* ((param (car (cdr lambda-list)))
-                                       (var-name (lisp-to-js-name param)))
+                                       (var-name (env-emitted-name (env-lookup env param))))
                                   (pushnew var-name *declared-vars*
                                            :test 'string=)
                                   (setf env (env-extend env param))
                                   (emit-indented-line "var $n = " n ";")
-                                  (emit-indented-line var-name " = " (compile-expression 'lunula::nil env) ";")
+                                  (emit-indented-line var-name " = " (compile-expression 'nil env) ";")
                                   (emit-indented-line "for($n = arguments.length-1; $n >= " n "; $n--) {")
                                   (with-indent
-                                    (emit-indented-line var-name " = { type: \"cons\", car: arguments[$n], cdr: " var-name " };"))
+                                      (emit-indented-line var-name " = { type: \"cons\", car: arguments[$n], cdr: " var-name " };"))
                                   (emit-indented-line "}"))
                                 ;; advance the lambda list forward after "&rest args"
                                 (setf lambda-list (cddr lambda-list)))
                               ;; we'll handle keyword arguments later
-                              #+nil(when (member (car lambda-list) '(lunula::&key
+                              #+nil(when (member (car lambda-list) '(&key
                                                                      cl::&key))
                                      ;; keyword args assume that from this point on the arguments
                                      ;; will be key/value pairs
                                      )))))
-    (compile-statement `(lunula::assert (,arity-op (lunula::js-inline () "$v = arguments.length;") arity))
+    (compile-statement `(assert (,arity-op (js-inline () "$v = arguments.length;") ,arity))
                        env)
     (emit compiled-params)
     env))
@@ -195,7 +234,7 @@
               (value (third v-p/p/value)))
           (when v-p
             (emit-indented-line p " = " value ";"))))
-      (concat (if (equal "$v" fun-name)
+      (emit-concat (if (equal "$v" fun-name)
                   (value)
                   (global-lookup-function fun-name))
               "("
@@ -212,10 +251,12 @@
 
 ;; COMPILER DISPATCH
 (defparameter *compiler-dispatch*
-  `((symbolp  compile-symbol-statement compile-symbol-expression)
-    (numberp  compile-number-statement compile-number-expression)
-    (stringp  compile-string-statement compile-string-expression)
-    (lambda-p compile-lambda-statement compile-lambda-expression)
+  `((symbolp     compile-symbol-statement    compile-symbol-expression)
+    (numberp     compile-number-statement    compile-number-expression)
+    (stringp     compile-string-statement    compile-string-expression)
+    (lambda-p    compile-lambda-statement    compile-lambda-expression)
+    (js-inline-p compile-js-inline-statement compile-js-inline-expression)
+    (js-lines-p  compile-js-lines-statement  compile-js-lines-expression)
     ;; anything else assumes call
     (listp   compile-call-statement   compile-call-expression)))
 
