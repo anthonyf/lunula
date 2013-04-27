@@ -41,5 +41,6 @@
    (:file "src/lexical-environment")
    (:file "src/global-environment")
    (:file "src/compiler-emitter")
+   (:file "src/compiler-lambda")
    (:file "src/compiler")))
 
