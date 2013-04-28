@@ -54,6 +54,7 @@
                 #:find-package
                 #:funcall
                 #:get
+                #:go
                 #:if
                 #:ignore
                 #:in-package
@@ -93,6 +94,7 @@
                 #:symbol-value
                 #:symbolp
                 #:t
+                #:tagbody
                 #:throw
                 #:truncate
                 #:type-of
