@@ -13,13 +13,3 @@ Lunula is a self-hosted Common Lisp to Javascript compiler.
 - When Javacript code boots, copy LUNULA package to COMMON-LISP package
 - Compile lunula.lisp again with itself, to validate self-hosting.
 
-** Initial Limitations:
-- Only simple LOOP supported
-- No CLOS (can be bolted on later)
-- No FORMAT (yet)
-- No ratios or complex numbers
-
-
-** Future Possibilities:
-- Implement CLOS with Portable Common Loops?
-- Compile to other languages, like C# or actionscript.  The goal is for compilation to other languages to be a mostly trival task.
