@@ -1,7 +1,7 @@
 (in-package :lunula)
 
 (defmacro prog1 (result &body body)
-  (cl:let ((gresult (gensym)))
+  (let ((gresult (gensym)))
     `(let ((,gresult ,result))
        ,@body
        ,gresult)))
@@ -10,7 +10,7 @@
   `(setf ,place (cons ,obj ,place)))
 
 (defmacro pushnew (obj place &key key test)
-  (cl:let ((obj-name (gensym)))
+  (let ((obj-name (gensym)))
     `(let ((,obj-name ,obj))
        (unless (member ,obj-name ,place
                        ,@(cl:when key

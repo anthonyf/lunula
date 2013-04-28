@@ -6,7 +6,7 @@
   (setf (macro-function 'defun)
         (lambda (form env)
           (declare (ignore env))
-          (cl:let ((body (cdr (cdr (cdr form))))
+          (let ((body (cdr (cdr (cdr form))))
                    (doc-string nil)
                    (declare nil))
             ;; do we have a doc string?
@@ -18,7 +18,7 @@
                           (eq 'declare (car (car body))))
               (setq declare (car body))
               (setq body (cdr body)))
-            (cl:let ((body body)
+            (let ((body body)
                      ;; block-name needs to be be a symbol, so deal with a
                      ;; '(setf ...) appropriately
                      (block-name (if (symbolp (car (cdr form)))

@@ -20,7 +20,7 @@
             ;; &body just treat the rest of the lambda list as usual
             (if (member (first lambda-list) '(&rest &optional &key &body))
                 ;; lambda doesnt know what &body is, so convert it to &rest
-                (cl:let ((body-pos (position '&body lambda-list)))
+                (let ((body-pos (position '&body lambda-list)))
                   (cl:when body-pos
                     (setf (nth body-pos lambda-list) '&rest))
                   `(apply (lambda (,@lambda-list)
@@ -33,15 +33,15 @@
   (setf (macro-function 'defmacro)
         (lambda (whole env)
           (declare (ignore env))
-          (cl:let ((macro-name (cadr whole))
-                   (lambda-list (caddr whole))
-                   (body (cdddr whole))
-                   (args (gensym "ARGS")))
+          (let ((macro-name (cadr whole))
+                (lambda-list (caddr whole))
+                (body (cdddr whole))
+                (args (gensym "ARGS")))
             `(eval-when (:compile-toplevel :load-toplevel :execute)
                (setf (macro-function ',macro-name)
                      (lambda (whole env)
                        (declare (ignore env))
-                       (cl:let ((,args (rest whole)))
+                       (let ((,args (rest whole)))
                          ,(expand-macro args
                                         lambda-list
                                         body)))))))))

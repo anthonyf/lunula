@@ -1,17 +1,3 @@
 (in-package :lunula)
 
-(defmacro let (vars &body forms)
-  `(funcall #'(lambda ,(mapcar #'(lambda (a)
-                                   (if (consp a)
-                                       (car a)
-                                       a))
-                               vars) ,@forms)
-            ,@(mapcar #'(lambda (a)
-                          (if (consp a)
-                              (cadr a)
-                              nil))
-                      vars)))
 
-(defmacro let* (vars &body forms)
-  (if vars `(let (,(car vars)) (let* ,(cdr vars) ,@forms))
-      `(let () ,@forms)))

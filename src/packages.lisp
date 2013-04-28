@@ -60,6 +60,8 @@
                 #:inline
                 #:intern
                 #:lambda
+                #:let
+                #:let*
                 #:loop ;; only simple loop supported for now
                 #:macro-function
                 #:macrolet
